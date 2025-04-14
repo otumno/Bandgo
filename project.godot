@@ -1,0 +1,23 @@
+config_version=5
+
+[application]
+
+config/name="Bandgo"
+run/main_scene="uid://drwceegmg3f64"
+config/features=PackedStringArray("4.4", "GL Compatibility")
+config/icon="res://icon.svg"
+
+[autoload]
+
+AudioManager="*res://project/scenes/AudioManagerScene.tscn"
+
+[display]
+
+window/size/viewport_width=1920
+window/size/viewport_height=1280
+window/size/mode=3
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"

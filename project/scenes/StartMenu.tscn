@@ -1,0 +1,124 @@
+[gd_scene load_steps=8 format=3 uid="uid://drwceegmg3f64"]
+
+[ext_resource type="Texture2D" uid="uid://c3fdp5uv1tsmn" path="res://project/assets/textures/3d851e77158111f09520e6b093fc7b06_1.jpg" id="1_w4ch6"]
+[ext_resource type="Theme" uid="uid://3pqwyww8rrpc" path="res://project/themes/new_theme.tres" id="3_a40we"]
+[ext_resource type="Script" uid="uid://c76uhy1vlvt8" path="res://project/scripts/PulsingBackground.gd" id="3_n7fgp"]
+[ext_resource type="Script" uid="uid://dthlr8d31egeg" path="res://project/scripts/SceneTransitionButton.gd" id="4_v6lke"]
+[ext_resource type="AudioStream" uid="uid://5rqibmdv53d1" path="res://project/assets/sounds/dropping-the-mic-41022.mp3" id="5_7o7kn"]
+[ext_resource type="AudioStream" uid="uid://c3wt5sah71g70" path="res://project/assets/sounds/dark_harmonics_distorted_guitar_sfx_15_dgsfx_15.mp3" id="6_mnb31"]
+[ext_resource type="AudioStream" uid="uid://b3frfc43b7rdu" path="res://project/assets/sounds/zapsplat_musical_guitar_acoustic_nylon_grab_neck_strings_002_56231.mp3" id="7_kotb3"]
+
+[node name="MainMenu" type="Node2D"]
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="TextureRect" type="TextureRect" parent="Control"]
+layout_mode = 0
+offset_right = 1920.0
+offset_bottom = 1281.0
+texture = ExtResource("1_w4ch6")
+script = ExtResource("3_n7fgp")
+bpm = 100
+beat_pattern = [false, true, true, true, false, true, true, true, false, true, true, true, false, true, true]
+max_scale = 1.01
+metadata/_edit_lock_ = true
+
+[node name="Label" type="Label" parent="Control"]
+top_level = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -692.0
+offset_top = -611.0
+offset_right = 956.0
+offset_bottom = -193.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(0.865, 0.865)
+theme = ExtResource("3_a40we")
+theme_override_colors/font_color = Color(0.992157, 0, 0, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_offset_x = 14
+theme_override_constants/shadow_offset_y = 12
+theme_override_font_sizes/font_size = 400
+text = "BANDGO"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = 2031.0
+offset_top = 817.0
+offset_right = 2157.0
+offset_bottom = 843.0
+grow_horizontal = 2
+grow_vertical = 0
+scale = Vector2(3.87974, 4.30884)
+theme = ExtResource("3_a40we")
+
+[node name="ButtonHelp" type="Button" parent="Control"]
+custom_minimum_size = Vector2(400, 150)
+layout_mode = 2
+offset_left = 671.0
+offset_top = 749.0
+offset_right = 1071.0
+offset_bottom = 899.0
+theme = ExtResource("3_a40we")
+text = "HELP"
+
+[node name="ButtonExit" type="Button" parent="Control"]
+custom_minimum_size = Vector2(400, 150)
+layout_mode = 2
+offset_left = 684.0
+offset_top = 912.0
+offset_right = 1084.0
+offset_bottom = 1062.0
+theme = ExtResource("3_a40we")
+text = "EXIT"
+icon_alignment = 1
+script = ExtResource("4_v6lke")
+transition_mode = 1
+transition_sound = ExtResource("5_7o7kn")
+transition_duration = 0.5
+
+[node name="ButtonSettings" type="Button" parent="Control"]
+custom_minimum_size = Vector2(400, 150)
+layout_mode = 2
+offset_left = 702.0
+offset_top = 640.0
+offset_right = 1102.0
+offset_bottom = 790.0
+theme = ExtResource("3_a40we")
+text = "SETTINGS"
+script = ExtResource("4_v6lke")
+target_scene_path = "uid://ctmu7som52is8"
+transition_sound = ExtResource("7_kotb3")
+fade_color = Color(0.774092, 0.230169, 1.92523e-07, 1)
+
+[node name="ButtonGame" type="Button" parent="Control"]
+custom_minimum_size = Vector2(400, 150)
+layout_mode = 2
+offset_left = 710.0
+offset_top = 416.0
+offset_right = 1110.0
+offset_bottom = 566.0
+theme = ExtResource("3_a40we")
+action_mode = 0
+text = "GAME"
+script = ExtResource("4_v6lke")
+target_scene_path = "uid://qjnkpl6bhcep"
+transition_sound = ExtResource("6_mnb31")
+transition_duration = 0.5
+fade_color = Color(1, 1, 1, 1)

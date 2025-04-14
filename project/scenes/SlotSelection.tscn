@@ -1,0 +1,36 @@
+[gd_scene load_steps=7 format=3 uid="uid://qjnkpl6bhcep"]
+
+[ext_resource type="Texture2D" uid="uid://c78ngijy4vill" path="res://project/assets/textures/39e37952158211f09aa8b6d248c3352f_1.jpg" id="1_87qkm"]
+[ext_resource type="Script" uid="uid://chnxutp3hdm6t" path="res://project/scripts/SceneAudioHandler.gd" id="1_776cj"]
+[ext_resource type="Script" uid="uid://c76uhy1vlvt8" path="res://project/scripts/PulsingBackground.gd" id="2_348qi"]
+[ext_resource type="Theme" uid="uid://3pqwyww8rrpc" path="res://project/themes/new_theme.tres" id="3_da7fl"]
+[ext_resource type="Script" uid="uid://dthlr8d31egeg" path="res://project/scripts/SceneTransitionButton.gd" id="4_5frhp"]
+[ext_resource type="AudioStream" uid="uid://b3frfc43b7rdu" path="res://project/assets/sounds/zapsplat_musical_guitar_acoustic_nylon_grab_neck_strings_002_56231.mp3" id="5_att4u"]
+
+[node name="SlotSelection" type="Node2D"]
+script = ExtResource("1_776cj")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+offset_right = 1920.0
+offset_bottom = 1281.0
+texture = ExtResource("1_87qkm")
+script = ExtResource("2_348qi")
+bpm = 100
+beat_pattern = [false, true, true, true, true, false, true, true, true, false, true, true, true, false, true, true]
+max_scale = 1.01
+metadata/_edit_lock_ = true
+
+[node name="Button" type="Button" parent="."]
+offset_left = 802.0
+offset_top = 1064.0
+offset_right = 985.0
+offset_bottom = 1163.0
+theme = ExtResource("3_da7fl")
+action_mode = 0
+text = "BACK"
+script = ExtResource("4_5frhp")
+target_scene_path = "uid://drwceegmg3f64"
+transition_sound = ExtResource("5_att4u")
+transition_duration = 0.5
+fade_color = Color(0, 0.86269, 1.15514e-06, 1)
+metadata/_edit_use_anchors_ = true
