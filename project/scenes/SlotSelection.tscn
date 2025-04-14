@@ -1,13 +1,19 @@
-[gd_scene load_steps=7 format=3 uid="uid://qjnkpl6bhcep"]
+[gd_scene load_steps=11 format=3 uid="uid://qjnkpl6bhcep"]
 
 [ext_resource type="Texture2D" uid="uid://c78ngijy4vill" path="res://project/assets/textures/39e37952158211f09aa8b6d248c3352f_1.jpg" id="1_87qkm"]
 [ext_resource type="Script" uid="uid://chnxutp3hdm6t" path="res://project/scripts/SceneAudioHandler.gd" id="1_776cj"]
 [ext_resource type="Script" uid="uid://c76uhy1vlvt8" path="res://project/scripts/PulsingBackground.gd" id="2_348qi"]
+[ext_resource type="Script" uid="uid://bffb657h6t2gn" path="res://project/scripts/SlotManager.gd" id="2_c52xp"]
+[ext_resource type="Script" uid="uid://dcgkg1reedxbq" path="res://project/scripts/NameInputDialog.gd" id="3_4mv2h"]
 [ext_resource type="Theme" uid="uid://3pqwyww8rrpc" path="res://project/themes/new_theme.tres" id="3_da7fl"]
 [ext_resource type="Script" uid="uid://dthlr8d31egeg" path="res://project/scripts/SceneTransitionButton.gd" id="4_5frhp"]
+[ext_resource type="Script" uid="uid://d02vsupk4imt1" path="res://project/scripts/SlotSelection.gd" id="4_vuudk"]
 [ext_resource type="AudioStream" uid="uid://b3frfc43b7rdu" path="res://project/assets/sounds/zapsplat_musical_guitar_acoustic_nylon_grab_neck_strings_002_56231.mp3" id="5_att4u"]
+[ext_resource type="Script" uid="uid://dfp4jo1lbqtik" path="res://project/scripts/ConfirmationDialog.gd" id="7_776cj"]
 
-[node name="SlotSelection" type="Node2D"]
+[node name="SlotSelection" type="Control"]
+layout_mode = 3
+anchors_preset = 0
 script = ExtResource("1_776cj")
 
 [node name="TextureRect" type="TextureRect" parent="."]
@@ -20,11 +26,80 @@ beat_pattern = [false, true, true, true, true, false, true, true, true, false, t
 max_scale = 1.01
 metadata/_edit_lock_ = true
 
-[node name="Button" type="Button" parent="."]
-offset_left = 802.0
-offset_top = 1064.0
-offset_right = 985.0
-offset_bottom = 1163.0
+[node name="SlotManager" type="Control" parent="."]
+anchors_preset = 0
+script = ExtResource("2_c52xp")
+
+[node name="SlotUI" type="VBoxContainer" parent="SlotManager"]
+unique_name_in_owner = true
+offset_left = 414.0
+offset_top = 690.0
+offset_right = 1498.0
+offset_bottom = 1202.0
+script = ExtResource("4_vuudk")
+
+[node name="Panel" type="Panel" parent="SlotManager/SlotUI"]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+
+[node name="Title" type="Label" parent="SlotManager/SlotUI/Panel"]
+layout_mode = 2
+offset_top = 4.0
+offset_right = 1083.0
+offset_bottom = 78.0
+theme = ExtResource("3_da7fl")
+theme_override_colors/font_color = Color(1, 0, 0, 1)
+text = "SAVE SLOTS"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="SlotManager/SlotUI"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+
+[node name="Slot1Button" type="Button" parent="SlotManager/SlotUI/HBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(800, 0)
+layout_mode = 2
+
+[node name="DeleteSlot1" type="Button" parent="SlotManager/SlotUI/HBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(280, 0)
+layout_mode = 2
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="SlotManager/SlotUI"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+
+[node name="Slot2Button" type="Button" parent="SlotManager/SlotUI/HBoxContainer2"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(800, 0)
+layout_mode = 2
+
+[node name="DeleteSlot2" type="Button" parent="SlotManager/SlotUI/HBoxContainer2"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(280, 0)
+layout_mode = 2
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="SlotManager/SlotUI"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+
+[node name="Slot3Button" type="Button" parent="SlotManager/SlotUI/HBoxContainer3"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(800, 0)
+layout_mode = 2
+
+[node name="DeleteSlot3" type="Button" parent="SlotManager/SlotUI/HBoxContainer3"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(280, 0)
+layout_mode = 2
+
+[node name="BackButton" type="Button" parent="SlotManager/SlotUI"]
+layout_mode = 2
 theme = ExtResource("3_da7fl")
 action_mode = 0
 text = "BACK"
@@ -34,3 +109,51 @@ transition_sound = ExtResource("5_att4u")
 transition_duration = 0.5
 fade_color = Color(0, 0.86269, 1.15514e-06, 1)
 metadata/_edit_use_anchors_ = true
+
+[node name="ConfirmDialog" type="ConfirmationDialog" parent="SlotManager"]
+unique_name_in_owner = true
+script = ExtResource("7_776cj")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="SlotManager/ConfirmDialog"]
+offset_right = 135.0
+offset_bottom = 58.0
+
+[node name="MessageLabel" type="Label" parent="SlotManager/ConfirmDialog/VBoxContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="SlotManager/ConfirmDialog/VBoxContainer"]
+layout_mode = 2
+
+[node name="CancelButton" type="Button" parent="SlotManager/ConfirmDialog/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Cancel"
+
+[node name="ConfirmButton" type="Button" parent="SlotManager/ConfirmDialog/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Confirm"
+
+[node name="NameDialog" type="Window" parent="SlotManager"]
+unique_name_in_owner = true
+position = Vector2i(0, 36)
+script = ExtResource("3_4mv2h")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="SlotManager/NameDialog"]
+offset_left = 4.0
+offset_top = 4.0
+offset_right = 296.0
+offset_bottom = 146.0
+
+[node name="Label" type="Label" parent="SlotManager/NameDialog/VBoxContainer"]
+layout_mode = 2
+
+[node name="NameEdit" type="LineEdit" parent="SlotManager/NameDialog/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="SlotManager/NameDialog/VBoxContainer"]
+layout_mode = 2
+
+[node name="OKButton" type="Button" parent="SlotManager/NameDialog/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "ОК"
