@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://qjnkpl6bhcep"]
+[gd_scene load_steps=12 format=3 uid="uid://qjnkpl6bhcep"]
 
 [ext_resource type="Texture2D" uid="uid://c78ngijy4vill" path="res://project/assets/textures/39e37952158211f09aa8b6d248c3352f_1.jpg" id="1_87qkm"]
 [ext_resource type="Script" uid="uid://chnxutp3hdm6t" path="res://project/scripts/SceneAudioHandler.gd" id="1_776cj"]
@@ -8,6 +8,7 @@
 [ext_resource type="Theme" uid="uid://3pqwyww8rrpc" path="res://project/themes/new_theme.tres" id="3_da7fl"]
 [ext_resource type="Script" uid="uid://dthlr8d31egeg" path="res://project/scripts/SceneTransitionButton.gd" id="4_5frhp"]
 [ext_resource type="Script" uid="uid://d02vsupk4imt1" path="res://project/scripts/SlotSelection.gd" id="4_vuudk"]
+[ext_resource type="AudioStream" uid="uid://c3wt5sah71g70" path="res://project/assets/sounds/dark_harmonics_distorted_guitar_sfx_15_dgsfx_15.mp3" id="5_1pc0d"]
 [ext_resource type="AudioStream" uid="uid://b3frfc43b7rdu" path="res://project/assets/sounds/zapsplat_musical_guitar_acoustic_nylon_grab_neck_strings_002_56231.mp3" id="5_att4u"]
 [ext_resource type="Script" uid="uid://dfp4jo1lbqtik" path="res://project/scripts/ConfirmationDialog.gd" id="7_776cj"]
 
@@ -17,6 +18,7 @@ anchors_preset = 0
 script = ExtResource("1_776cj")
 
 [node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 0
 offset_right = 1920.0
 offset_bottom = 1281.0
 texture = ExtResource("1_87qkm")
@@ -29,9 +31,13 @@ metadata/_edit_lock_ = true
 [node name="SlotManager" type="Control" parent="."]
 anchors_preset = 0
 script = ExtResource("2_c52xp")
+transition_sound = ExtResource("5_1pc0d")
+fade_duration = 1.0
+target_scene = "res://project/scenes/Game.tscn"
 
 [node name="SlotUI" type="VBoxContainer" parent="SlotManager"]
 unique_name_in_owner = true
+layout_mode = 0
 offset_left = 414.0
 offset_top = 690.0
 offset_right = 1498.0
@@ -62,11 +68,15 @@ layout_mode = 2
 unique_name_in_owner = true
 custom_minimum_size = Vector2(800, 0)
 layout_mode = 2
+theme = ExtResource("3_da7fl")
+theme_override_font_sizes/font_size = 40
 
 [node name="DeleteSlot1" type="Button" parent="SlotManager/SlotUI/HBoxContainer"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(280, 0)
 layout_mode = 2
+theme = ExtResource("3_da7fl")
+theme_override_font_sizes/font_size = 40
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="SlotManager/SlotUI"]
 unique_name_in_owner = true
@@ -77,11 +87,15 @@ layout_mode = 2
 unique_name_in_owner = true
 custom_minimum_size = Vector2(800, 0)
 layout_mode = 2
+theme = ExtResource("3_da7fl")
+theme_override_font_sizes/font_size = 40
 
 [node name="DeleteSlot2" type="Button" parent="SlotManager/SlotUI/HBoxContainer2"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(280, 0)
 layout_mode = 2
+theme = ExtResource("3_da7fl")
+theme_override_font_sizes/font_size = 40
 
 [node name="HBoxContainer3" type="HBoxContainer" parent="SlotManager/SlotUI"]
 unique_name_in_owner = true
@@ -92,11 +106,15 @@ layout_mode = 2
 unique_name_in_owner = true
 custom_minimum_size = Vector2(800, 0)
 layout_mode = 2
+theme = ExtResource("3_da7fl")
+theme_override_font_sizes/font_size = 40
 
 [node name="DeleteSlot3" type="Button" parent="SlotManager/SlotUI/HBoxContainer3"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(280, 0)
 layout_mode = 2
+theme = ExtResource("3_da7fl")
+theme_override_font_sizes/font_size = 40
 
 [node name="BackButton" type="Button" parent="SlotManager/SlotUI"]
 layout_mode = 2
@@ -106,54 +124,77 @@ text = "BACK"
 script = ExtResource("4_5frhp")
 target_scene_path = "uid://drwceegmg3f64"
 transition_sound = ExtResource("5_att4u")
-transition_duration = 0.5
-fade_color = Color(0, 0.86269, 1.15514e-06, 1)
+transition_duration = 0.3
+fade_color = Color(1, 1, 1, 1)
 metadata/_edit_use_anchors_ = true
 
 [node name="ConfirmDialog" type="ConfirmationDialog" parent="SlotManager"]
 unique_name_in_owner = true
+position = Vector2i(300, 500)
+size = Vector2i(1300, 400)
+visible = true
+borderless = true
+theme = ExtResource("3_da7fl")
 script = ExtResource("7_776cj")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="SlotManager/ConfirmDialog"]
-offset_right = 135.0
-offset_bottom = 58.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -100.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="MessageLabel" type="Label" parent="SlotManager/ConfirmDialog/VBoxContainer"]
 layout_mode = 2
-
-[node name="HBoxContainer" type="HBoxContainer" parent="SlotManager/ConfirmDialog/VBoxContainer"]
-layout_mode = 2
-
-[node name="CancelButton" type="Button" parent="SlotManager/ConfirmDialog/VBoxContainer/HBoxContainer"]
-layout_mode = 2
-text = "Cancel"
-
-[node name="ConfirmButton" type="Button" parent="SlotManager/ConfirmDialog/VBoxContainer/HBoxContainer"]
-layout_mode = 2
-text = "Confirm"
+text = "
+THIS DELETE SLOT!
+ARE YOU SURE"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="NameDialog" type="Window" parent="SlotManager"]
 unique_name_in_owner = true
-position = Vector2i(0, 36)
+initial_position = 1
+size = Vector2i(1000, 300)
+visible = false
+borderless = true
+popup_window = true
 script = ExtResource("3_4mv2h")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="SlotManager/NameDialog"]
-offset_left = 4.0
-offset_top = 4.0
-offset_right = 296.0
-offset_bottom = 146.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="Label" type="Label" parent="SlotManager/NameDialog/VBoxContainer"]
 layout_mode = 2
+theme = ExtResource("3_da7fl")
+text = "ENTER BAND NAME"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="NameEdit" type="LineEdit" parent="SlotManager/NameDialog/VBoxContainer"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(500, 100)
 layout_mode = 2
+theme = ExtResource("3_da7fl")
+placeholder_text = "...Bandidago..."
+alignment = 1
+caret_blink = true
 
 [node name="HBoxContainer" type="HBoxContainer" parent="SlotManager/NameDialog/VBoxContainer"]
 layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
 
 [node name="OKButton" type="Button" parent="SlotManager/NameDialog/VBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+theme = ExtResource("3_da7fl")
 text = "ОК"

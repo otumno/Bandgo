@@ -9,69 +9,59 @@ enum TransitionType { SCENE, QUIT }
 @export var transition_duration: float = 1.0
 @export var fade_color: Color = Color.BLACK
 
-@export_category("Debug")
-@export var debug_logging: bool = true
-
 var is_transitioning: bool = false
 var audio_player: AudioStreamPlayer
 
-func _ready():
+func _ready() -> void:
 	_init_audio_player()
-	connect("pressed", Callable(self, "_on_button_pressed"))
+	connect("pressed", _on_button_pressed)
 
-func _init_audio_player():
-	if not has_node("AudioStreamPlayer"):
-		audio_player = AudioStreamPlayer.new()
-		audio_player.name = "AudioStreamPlayer"
-		add_child(audio_player)
-	else:
-		audio_player = $AudioStreamPlayer
+func _init_audio_player() -> void:
+	audio_player = AudioStreamPlayer.new()
+	audio_player.name = "TransitionAudioPlayer"
+	add_child(audio_player)
 	audio_player.stream = transition_sound
 
-func _on_button_pressed():
-	if debug_logging:
-		print_debug("Button pressed, mode: ", transition_mode)
-	await start_transition()
-
-func start_transition():
+func _on_button_pressed() -> void:
 	if is_transitioning:
 		return
-	is_transitioning = true
-	set_disabled(true)
+	
+	await start_transition()
 
-	# Создаем затемнение
-	var fade_rect = _create_fade_rect()
-	
-	# Параллельный запуск звука и анимации
-	var tween = create_tween().set_parallel(true)
-	
+func start_transition() -> void:
+	is_transitioning = true
+	disabled = true
+
+	# Воспроизведение звука
 	if transition_sound:
 		audio_player.play()
-		tween.tween_callback(audio_player.play)
-	
+
+	# Создаем затемнение
+	var fade_rect := ColorRect.new()
+	fade_rect.color = fade_color
+	fade_rect.color.a = 0.0
+	fade_rect.size = get_viewport_rect().size
+	fade_rect.z_index = 1000  # Поверх всех элементов
+	get_tree().root.add_child(fade_rect)
+
+	# Анимация
+	var tween := create_tween()
 	tween.tween_property(fade_rect, "color:a", 1.0, transition_duration)
 	await tween.finished
 
-	# Выполняем действие после анимации
+	# Выполняем действие
 	match transition_mode:
 		TransitionType.SCENE:
-			if not target_scene_path.is_empty():
-				if ResourceLoader.exists(target_scene_path):
-					get_tree().change_scene_to_file(target_scene_path)
-				else:
-					push_error("Scene file not found: ", target_scene_path)
+			if target_scene_path and ResourceLoader.exists(target_scene_path):
+				get_tree().change_scene_to_file(target_scene_path)
+			else:
+				push_error("Target scene not found: ", target_scene_path)
 		TransitionType.QUIT:
 			get_tree().quit()
-	
-	# В реальности эта часть выполнится только если переход не сработал
-	fade_rect.queue_free()
-	is_transitioning = false
-	set_disabled(false)
 
-func _create_fade_rect() -> ColorRect:
-	var rect = ColorRect.new()
-	rect.color = fade_color
-	rect.color.a = 0.0
-	rect.size = get_viewport().size
-	get_tree().root.add_child(rect)
-	return rect
+	# Очистка
+	if is_instance_valid(fade_rect):
+		fade_rect.queue_free()
+	
+	is_transitioning = false
+	disabled = false

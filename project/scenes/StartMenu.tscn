@@ -1,11 +1,12 @@
-[gd_scene load_steps=8 format=3 uid="uid://drwceegmg3f64"]
+[gd_scene load_steps=9 format=3 uid="uid://drwceegmg3f64"]
 
 [ext_resource type="Texture2D" uid="uid://c3fdp5uv1tsmn" path="res://project/assets/textures/3d851e77158111f09520e6b093fc7b06_1.jpg" id="1_w4ch6"]
 [ext_resource type="Theme" uid="uid://3pqwyww8rrpc" path="res://project/themes/new_theme.tres" id="3_a40we"]
 [ext_resource type="Script" uid="uid://c76uhy1vlvt8" path="res://project/scripts/PulsingBackground.gd" id="3_n7fgp"]
+[ext_resource type="StyleBox" uid="uid://bf1xo2ravjsjd" path="res://MetalButtonFocus.tres" id="4_7o7kn"]
 [ext_resource type="Script" uid="uid://dthlr8d31egeg" path="res://project/scripts/SceneTransitionButton.gd" id="4_v6lke"]
 [ext_resource type="AudioStream" uid="uid://5rqibmdv53d1" path="res://project/assets/sounds/dropping-the-mic-41022.mp3" id="5_7o7kn"]
-[ext_resource type="AudioStream" uid="uid://c3wt5sah71g70" path="res://project/assets/sounds/dark_harmonics_distorted_guitar_sfx_15_dgsfx_15.mp3" id="6_mnb31"]
+[ext_resource type="StyleBox" uid="uid://cvqood1knb8of" path="res://MetalButton.tres" id="5_rsqw1"]
 [ext_resource type="AudioStream" uid="uid://b3frfc43b7rdu" path="res://project/assets/sounds/zapsplat_musical_guitar_acoustic_nylon_grab_neck_strings_002_56231.mp3" id="7_kotb3"]
 
 [node name="MainMenu" type="Node2D"]
@@ -71,54 +72,88 @@ theme = ExtResource("3_a40we")
 [node name="ButtonHelp" type="Button" parent="Control"]
 custom_minimum_size = Vector2(400, 150)
 layout_mode = 2
-offset_left = 671.0
-offset_top = 749.0
-offset_right = 1071.0
-offset_bottom = 899.0
+offset_left = 677.0
+offset_top = 760.0
+offset_right = 1152.0
+offset_bottom = 910.0
 theme = ExtResource("3_a40we")
+theme_override_colors/font_color = Color(0, 0.796078, 0, 1)
+theme_override_font_sizes/font_size = 80
+theme_override_styles/focus = ExtResource("5_rsqw1")
+theme_override_styles/hover_pressed = ExtResource("5_rsqw1")
+theme_override_styles/hover = ExtResource("4_7o7kn")
+theme_override_styles/pressed = ExtResource("5_rsqw1")
+theme_override_styles/normal = ExtResource("5_rsqw1")
 text = "HELP"
+script = ExtResource("4_v6lke")
+target_scene_path = "uid://chr1pwq6ntvg"
+transition_sound = ExtResource("7_kotb3")
+transition_duration = 0.3
+fade_color = Color(1, 1, 1, 1)
 
 [node name="ButtonExit" type="Button" parent="Control"]
 custom_minimum_size = Vector2(400, 150)
 layout_mode = 2
-offset_left = 684.0
-offset_top = 912.0
-offset_right = 1084.0
-offset_bottom = 1062.0
+offset_left = 677.0
+offset_top = 921.0
+offset_right = 1152.0
+offset_bottom = 1071.0
 theme = ExtResource("3_a40we")
+theme_override_colors/font_color = Color(0.87173, 0.483607, 0.0931894, 1)
+theme_override_font_sizes/font_size = 80
+theme_override_styles/focus = ExtResource("5_rsqw1")
+theme_override_styles/hover_pressed = ExtResource("5_rsqw1")
+theme_override_styles/hover = ExtResource("4_7o7kn")
+theme_override_styles/pressed = ExtResource("5_rsqw1")
+theme_override_styles/normal = ExtResource("5_rsqw1")
 text = "EXIT"
 icon_alignment = 1
 script = ExtResource("4_v6lke")
 transition_mode = 1
 transition_sound = ExtResource("5_7o7kn")
-transition_duration = 0.5
+fade_color = Color(1, 1, 1, 1)
 
 [node name="ButtonSettings" type="Button" parent="Control"]
 custom_minimum_size = Vector2(400, 150)
 layout_mode = 2
-offset_left = 702.0
-offset_top = 640.0
-offset_right = 1102.0
-offset_bottom = 790.0
+offset_left = 677.0
+offset_top = 610.0
+offset_right = 1152.0
+offset_bottom = 760.0
 theme = ExtResource("3_a40we")
+theme_override_colors/font_color = Color(0.634923, 0.266941, 0.886529, 1)
+theme_override_font_sizes/font_size = 80
+theme_override_styles/focus = ExtResource("5_rsqw1")
+theme_override_styles/hover_pressed = ExtResource("5_rsqw1")
+theme_override_styles/hover = ExtResource("4_7o7kn")
+theme_override_styles/pressed = ExtResource("5_rsqw1")
+theme_override_styles/normal = ExtResource("5_rsqw1")
 text = "SETTINGS"
 script = ExtResource("4_v6lke")
 target_scene_path = "uid://ctmu7som52is8"
 transition_sound = ExtResource("7_kotb3")
-fade_color = Color(0.774092, 0.230169, 1.92523e-07, 1)
+transition_duration = 0.3
+fade_color = Color(1, 1, 1, 1)
 
 [node name="ButtonGame" type="Button" parent="Control"]
 custom_minimum_size = Vector2(400, 150)
 layout_mode = 2
-offset_left = 710.0
-offset_top = 416.0
-offset_right = 1110.0
-offset_bottom = 566.0
+offset_left = 677.0
+offset_top = 455.0
+offset_right = 1152.0
+offset_bottom = 610.0
 theme = ExtResource("3_a40we")
+theme_override_colors/font_color = Color(1, 0, 0, 1)
+theme_override_font_sizes/font_size = 100
+theme_override_styles/focus = ExtResource("5_rsqw1")
+theme_override_styles/hover_pressed = ExtResource("5_rsqw1")
+theme_override_styles/hover = ExtResource("4_7o7kn")
+theme_override_styles/pressed = ExtResource("5_rsqw1")
+theme_override_styles/normal = ExtResource("5_rsqw1")
 action_mode = 0
 text = "GAME"
 script = ExtResource("4_v6lke")
-target_scene_path = "uid://qjnkpl6bhcep"
-transition_sound = ExtResource("6_mnb31")
-transition_duration = 0.5
+target_scene_path = "res://project/scenes/SlotSelection.tscn"
+transition_sound = ExtResource("7_kotb3")
+transition_duration = 0.3
 fade_color = Color(1, 1, 1, 1)

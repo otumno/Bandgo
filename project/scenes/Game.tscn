@@ -1,6 +1,9 @@
-[gd_scene load_steps=2 format=3 uid="uid://crxvqga1dtvbn"]
+[gd_scene load_steps=5 format=3 uid="uid://crxvqga1dtvbn"]
 
 [ext_resource type="Texture2D" uid="uid://cbweq7e7c7pcd" path="res://project/assets/textures/6f018d8a158211f0a4402e814483879f_1.jpg" id="1_kgxh5"]
+[ext_resource type="Theme" uid="uid://3pqwyww8rrpc" path="res://project/themes/new_theme.tres" id="4_cqeua"]
+[ext_resource type="Script" uid="uid://dthlr8d31egeg" path="res://project/scripts/SceneTransitionButton.gd" id="5_twjpx"]
+[ext_resource type="AudioStream" uid="uid://b3frfc43b7rdu" path="res://project/assets/sounds/zapsplat_musical_guitar_acoustic_nylon_grab_neck_strings_002_56231.mp3" id="6_m7itv"]
 
 [node name="Game" type="Node2D"]
 
@@ -8,3 +11,18 @@
 offset_right = 1920.0
 offset_bottom = 1281.0
 texture = ExtResource("1_kgxh5")
+
+[node name="BackButton" type="Button" parent="."]
+offset_left = 85.0
+offset_top = 154.0
+offset_right = 291.0
+offset_bottom = 236.0
+theme = ExtResource("4_cqeua")
+action_mode = 0
+text = "BACK"
+script = ExtResource("5_twjpx")
+target_scene_path = "uid://drwceegmg3f64"
+transition_sound = ExtResource("6_m7itv")
+transition_duration = 0.3
+fade_color = Color(1, 1, 1, 1)
+metadata/_edit_use_anchors_ = true

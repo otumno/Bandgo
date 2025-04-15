@@ -1,21 +1,23 @@
 extends ConfirmationDialog
 
-@onready var message_label: Label = $VBoxContainer/MessageLabel
-@onready var cancel_button: Button = $VBoxContainer/HBoxContainer/CancelButton
-@onready var confirm_button: Button = $VBoxContainer/HBoxContainer/ConfirmButton
+signal confirmed
 
 func _ready() -> void:
-	# Настройка кнопок
+	# Настройка диалога
+	dialog_autowrap = true
+	get_label().horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	
+	# Подключаем сигналы кнопок
+	confirmed.connect(_on_confirmed)
 	cancel_button.pressed.connect(_on_cancel_pressed)
-	confirm_button.pressed.connect(_on_confirm_pressed)
 
 func show_confirmation(message: String) -> void:
-	message_label.text = message
+	dialog_text = message
 	popup_centered()
 
-func _on_cancel_pressed() -> void:
+func _on_confirmed() -> void:
+	confirmed.emit()
 	hide()
 
-func _on_confirm_pressed() -> void:
-	confirmed.emit()
+func _on_cancel_pressed() -> void:
 	hide()

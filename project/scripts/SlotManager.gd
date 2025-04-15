@@ -3,98 +3,56 @@ extends Control
 signal game_loaded(slot_number: int)
 signal save_deleted(slot_number: int)
 
-# Элементы UI с альтернативной инициализацией
+# Элементы UI
 @onready var slot_buttons: Array[Button] = [
-	find_child("Slot1Button"),
-	find_child("Slot2Button"),
-	find_child("Slot3Button")
+	$SlotUI/HBoxContainer/Slot1Button,
+	$SlotUI/HBoxContainer2/Slot2Button,
+	$SlotUI/HBoxContainer3/Slot3Button
 ]
 
 @onready var delete_buttons: Array[Button] = [
-	find_child("DeleteSlot1"),
-	find_child("DeleteSlot2"),
-	find_child("DeleteSlot3")
+	$SlotUI/HBoxContainer/DeleteSlot1,
+	$SlotUI/HBoxContainer2/DeleteSlot2,
+	$SlotUI/HBoxContainer3/DeleteSlot3
 ]
 
-@onready var back_button: Button = find_child("BackButton")
-@onready var confirm_dialog: ConfirmationDialog = find_child("ConfirmDialog")
-@onready var name_dialog: Window = find_child("NameDialog")
-@onready var name_input: LineEdit = find_child("NameEdit")
-@onready var name_ok_button: Button = find_child("OKButton")
+@onready var confirm_dialog: ConfirmationDialog = $ConfirmDialog
+@onready var name_dialog: Window = $NameDialog
+@onready var name_input: LineEdit = $NameDialog/VBoxContainer/NameEdit
+@onready var name_ok_button: Button = $NameDialog/VBoxContainer/HBoxContainer/OKButton
+
+# Настройки перехода
+@export var transition_sound: AudioStream
+@export var fade_duration: float = 0.5
+@export var target_scene: String = "res://Game.tscn"
 
 var current_slot := 0
 
 func _ready() -> void:
-	# Проверка инициализации
-	if not _validate_ui_elements():
-		push_error("Не удалось инициализировать все UI элементы!")
-		print_uninitialized_elements()
-		queue_free()
-		return
-	
-	# Настройка
 	_setup_dialogs()
 	_connect_signals()
 	update_slots_display()
 
-func _validate_ui_elements() -> bool:
-	# Проверяем кнопки слотов
-	for i in 3:
-		if not is_instance_valid(slot_buttons[i]):
-			return false
-		if not is_instance_valid(delete_buttons[i]):
-			return false
-	
-	# Проверяем остальные элементы
-	return (is_instance_valid(back_button) and
-			is_instance_valid(confirm_dialog) and
-			is_instance_valid(name_dialog) and
-			is_instance_valid(name_input) and
-			is_instance_valid(name_ok_button))
-
-func print_uninitialized_elements() -> void:
-	var missing := []
-	
-	for i in 3:
-		if not is_instance_valid(slot_buttons[i]):
-			missing.append("Slot%dButton" % (i+1))
-		if not is_instance_valid(delete_buttons[i]):
-			missing.append("DeleteSlot%d" % (i+1))
-	
-	if not is_instance_valid(back_button):
-		missing.append("BackButton")
-	if not is_instance_valid(confirm_dialog):
-		missing.append("ConfirmDialog")
-	if not is_instance_valid(name_dialog):
-		missing.append("NameDialog")
-	if not is_instance_valid(name_input):
-		missing.append("NameEdit")
-	if not is_instance_valid(name_ok_button):
-		missing.append("OKButton")
-	
-	push_error("Отсутствующие элементы: ", missing)
-
 func _setup_dialogs() -> void:
-	# Настройка диалога подтверждения
+	# Настройка ConfirmDialog (встроенный ConfirmationDialog)
 	confirm_dialog.dialog_autowrap = true
 	confirm_dialog.get_label().horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	confirm_dialog.get_ok_button().text = "Удалить"
+	confirm_dialog.get_ok_button().text = "Да"
 	confirm_dialog.get_cancel_button().text = "Отмена"
 	
-	# Настройка диалога ввода имени
+	# Настройка NameDialog
 	name_dialog.title = "Введите имя игрока"
-	name_dialog.size = Vector2(300, 150)
 
 func _connect_signals() -> void:
-	# Подключаем кнопки слотов
 	for i in 3:
 		slot_buttons[i].pressed.connect(_on_slot_pressed.bind(i + 1))
 		delete_buttons[i].pressed.connect(_on_delete_pressed.bind(i + 1))
 	
-	# Другие элементы
-	back_button.pressed.connect(_on_back_pressed)
 	name_ok_button.pressed.connect(_on_name_confirmed)
 	name_input.text_submitted.connect(_on_name_submitted)
+	
+	# Подключаем сигналы ConfirmationDialog
+	confirm_dialog.confirmed.connect(_on_confirm_dialog_confirmed)
 
 func update_slots_display() -> void:
 	for i in 3:
@@ -105,10 +63,7 @@ func update_slots_display() -> void:
 			slot_buttons[i].text = "Slot %d" % slot_num
 			delete_buttons[i].visible = false
 		else:
-			slot_buttons[i].text = "%s\n%d Fame" % [
-				save_info["player_name"], 
-				save_info["fame"]
-			]
+			slot_buttons[i].text = "%s\n%d Fame" % [save_info["player_name"], save_info["fame"]]
 			delete_buttons[i].visible = true
 
 func _on_slot_pressed(slot_number: int) -> void:
@@ -120,16 +75,19 @@ func _on_slot_pressed(slot_number: int) -> void:
 		name_input.grab_focus()
 	else:
 		if SaveSystem.load_game(slot_number):
-			game_loaded.emit(slot_number)
+			_transition_to_game(slot_number)
 
 func _on_delete_pressed(slot_number: int) -> void:
-	confirm_dialog.dialog_text = "Удалить сохранение в слоте %d?\nЭто действие нельзя отменить!" % slot_number
+	confirm_dialog.dialog_text = "Удалить сохранение в слоте %d?" % slot_number
 	confirm_dialog.popup_centered()
-	
 	var confirmed: bool = await confirm_dialog.confirmed
 	if confirmed and SaveSystem.delete_save(slot_number):
 		save_deleted.emit(slot_number)
 		update_slots_display()
+
+func _on_confirm_dialog_confirmed() -> void:
+	# Обработка подтверждения в диалоге
+	pass
 
 func _on_name_confirmed() -> void:
 	_process_name_input()
@@ -144,7 +102,31 @@ func _process_name_input() -> void:
 		SaveSystem.fame = 0
 		if SaveSystem.save_game(current_slot):
 			name_dialog.hide()
-			game_loaded.emit(current_slot)
+			_transition_to_game(current_slot)
 
-func _on_back_pressed() -> void:
-	get_tree().change_scene_to_file("res://scenes/MainMenu.tscn")
+func _transition_to_game(slot_number: int) -> void:
+	# Воспроизведение звука перехода
+	if transition_sound:
+		var audio_player = AudioStreamPlayer.new()
+		add_child(audio_player)
+		audio_player.stream = transition_sound
+		audio_player.play()
+		await audio_player.finished
+		audio_player.queue_free()
+	
+	# Анимация затемнения
+	var fade_rect = ColorRect.new()
+	fade_rect.color = Color.BLACK
+	fade_rect.size = get_viewport_rect().size
+	fade_rect.modulate.a = 0.0
+	add_child(fade_rect)
+	
+	var tween = create_tween()
+	tween.tween_property(fade_rect, "modulate:a", 1.0, fade_duration)
+	await tween.finished
+	
+	# Переход на сцену
+	get_tree().change_scene_to_file(target_scene)
+	
+	# Оповещение о загрузке игры
+	game_loaded.emit(slot_number)
