@@ -77,33 +77,32 @@ func _on_confirm_delete():
 		update_slots_display()
 
 func _on_name_confirmed(_text = ""):
-	var name = name_input.text.strip_edges()
-	if name.is_empty(): return
+	var input_name = name_input.text.strip_edges()
+	if input_name.is_empty(): return
 	
-	var gm = get_node("/root/GameManager")
-	gm.player_name = name
-	gm.score = 0
-	gm.current_slot = current_slot
-	
-	if SaveSystem.save_game(current_slot):
-		name_dialog.hide()
-		_start_game_transition()
+	# Изменено обращение к GameManager через автозагрузку
+	var game_manager = get_node("/root/GameManager")
+	if game_manager:
+		game_manager.player_name = input_name
+		game_manager.score = 0
+		game_manager.current_slot = current_slot
+		
+		if SaveSystem.save_game(current_slot):
+			name_dialog.hide()
+			_start_game_transition()
 
 func _start_game_transition():
 	if _is_transitioning: return
 	_is_transitioning = true
 	
-	# 1. Загружаем игру
 	if not SaveSystem.load_game(current_slot):
 		push_error("Ошибка загрузки сохранения!")
 		_is_transitioning = false
 		return
 	
-	# 2. Создаем эффекты перехода
 	var fade_rect = _create_fade_rect()
 	var audio_player = _create_audio_player()
 	
-	# 3. Параллельные анимации
 	var tween = create_tween().set_parallel(true)
 	
 	if audio_player:
@@ -112,7 +111,6 @@ func _start_game_transition():
 	tween.tween_property(fade_rect, "color:a", 1.0, fade_duration)
 	await tween.finished
 	
-	# 4. Переход на сцену
 	var target_scene = "res://project/scenes/Game.tscn"
 	if has_node("/root/SceneTransitionManager"):
 		get_node("/root/SceneTransitionManager").transition_to_scene(target_scene)
@@ -120,7 +118,6 @@ func _start_game_transition():
 		if get_tree().change_scene_to_file(target_scene) != OK:
 			push_error("Ошибка загрузки сцены!")
 	
-	# 5. Очистка
 	if is_instance_valid(fade_rect):
 		fade_rect.queue_free()
 

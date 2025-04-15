@@ -25,27 +25,20 @@ func _init_audio_player() -> void:
 func _on_button_pressed() -> void:
 	if is_transitioning:
 		return
-	
-	# Останавливаем музыку сразу при нажатии (только для выхода из игры)
-	if transition_mode == TransitionType.QUIT:
-		var audio_manager = get_node("/root/AudioManager")
-		if audio_manager:
-			audio_manager.stop_music()
-	
-	# Воспроизводим звук нажатия
-	if transition_sound:
-		audio_player.play()
-	
 	await start_transition()
 
 func start_transition() -> void:
 	is_transitioning = true
 	disabled = true
 
-	# Получаем корневой Viewport
-	var viewport = get_tree().root
-	
+	# Остановка музыки при выходе из игры
+	if transition_mode == TransitionType.QUIT:
+		var audio_manager = get_node_or_null("/root/AudioManager")
+		if audio_manager and audio_manager.has_method("stop_all_music"):
+			audio_manager.stop_all_music()
+
 	# Создаем эффект затемнения
+	var viewport = get_tree().root
 	var fade_rect := ColorRect.new()
 	fade_rect.color = fade_color
 	fade_rect.color.a = 0.0
@@ -53,18 +46,20 @@ func start_transition() -> void:
 	fade_rect.z_index = 1000
 	viewport.add_child(fade_rect)
 
-	# Анимация затемнения
-	var tween := create_tween()
+	# Анимации
+	var tween := create_tween().set_parallel(true)
+	
+	if transition_sound:
+		audio_player.play()
+	
 	tween.tween_property(fade_rect, "color:a", 1.0, transition_duration)
 	await tween.finished
 
-	# Выполняем действие после завершения анимации
+	# Действие после анимации
 	match transition_mode:
 		TransitionType.SCENE:
 			if target_scene_path and ResourceLoader.exists(target_scene_path):
 				get_tree().change_scene_to_file(target_scene_path)
-			else:
-				push_error("Target scene not found: ", target_scene_path)
 		TransitionType.QUIT:
 			get_tree().quit()
 

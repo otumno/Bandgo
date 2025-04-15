@@ -1,0 +1,13 @@
+[gd_scene load_steps=5 format=3 uid="uid://b0i5eb0wg2f7m"]
+
+[ext_resource type="Script" uid="uid://c75nob438sph0" path="res://project/scripts/BPM_Manager.gd" id="1_7n0pn"]
+[ext_resource type="AudioStream" uid="uid://ewwcwvre4fig" path="res://project/assets/sounds/Tac.mp3" id="2_6rr8p"]
+[ext_resource type="AudioStream" uid="uid://hd3rxq44mh6f" path="res://project/assets/sounds/Tic.mp3" id="3_3r4sx"]
+[ext_resource type="AudioStream" uid="uid://cq36dei7pt3xs" path="res://project/assets/sounds/250-milliseconds-of-silence.mp3" id="4_3r4sx"]
+
+[node name="BpmManager" type="Node"]
+script = ExtResource("1_7n0pn")
+bpm = 100
+metronome_pattern = Array[int]([1, 0, 2, 0, 2, 0, 2, 0])
+metronome_sounds = Array[AudioStream]([ExtResource("2_6rr8p"), ExtResource("3_3r4sx"), ExtResource("4_3r4sx")])
+metadata/_custom_type_script = "uid://c75nob438sph0"

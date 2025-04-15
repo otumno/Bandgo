@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://crxvqga1dtvbn"]
+[gd_scene load_steps=15 format=3 uid="uid://crxvqga1dtvbn"]
 
 [ext_resource type="Script" uid="uid://chnxutp3hdm6t" path="res://project/scripts/SceneAudioHandler.gd" id="1_cqeua"]
 [ext_resource type="Texture2D" uid="uid://cbweq7e7c7pcd" path="res://project/assets/textures/6f018d8a158211f0a4402e814483879f_1.jpg" id="1_kgxh5"]
@@ -9,14 +9,19 @@
 [ext_resource type="Script" uid="uid://c75nob438sph0" path="res://project/scripts/BPM_Manager.gd" id="7_f3117"]
 [ext_resource type="AudioStream" uid="uid://ewwcwvre4fig" path="res://project/assets/sounds/Tac.mp3" id="8_a6cnm"]
 [ext_resource type="AudioStream" uid="uid://hd3rxq44mh6f" path="res://project/assets/sounds/Tic.mp3" id="9_xewpq"]
+[ext_resource type="Texture2D" uid="uid://degv8ksy8ppva" path="res://project/assets/textures/—Pngtree—iron drum_4431249.png" id="10_a6cnm"]
+[ext_resource type="Script" uid="uid://cyi4htwqahhjt" path="res://project/scripts/Instrument.gd" id="10_mvo24"]
+[ext_resource type="AudioStream" uid="uid://cks06x3rce5ct" path="res://project/assets/sounds/791446__micah10__floor-tom-16.wav" id="11_qo2pe"]
+[ext_resource type="AudioStream" uid="uid://dpjry6d4p7730" path="res://project/assets/sounds/steel-bench-hit4-89132.mp3" id="12_5gtpa"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_f3117"]
-size = Vector2(88, 115)
+size = Vector2(149, 241)
 
 [node name="Game" type="Node2D"]
 script = ExtResource("1_cqeua")
 use_local_music = true
 local_music = ExtResource("2_f3117")
+music_volume = 0.5
 
 [node name="TextureRect" type="TextureRect" parent="."]
 offset_right = 1920.0
@@ -44,8 +49,32 @@ bpm = 100
 metronome_pattern = Array[int]([1, 2, 2, 2])
 metronome_sounds = Array[AudioStream]([ExtResource("8_a6cnm"), ExtResource("9_xewpq")])
 
-[node name="Area2D" type="Area2D" parent="."]
+[node name="Instrument_Barrel" type="Area2D" parent="."]
+script = ExtResource("10_mvo24")
+correct_sound_pattern = Array[AudioStream]([ExtResource("11_qo2pe"), ExtResource("11_qo2pe")])
+fail_sound = ExtResource("12_5gtpa")
+first_click_sound = ExtResource("11_qo2pe")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
-position = Vector2(-68, 124)
+[node name="Sprite2D" type="Sprite2D" parent="Instrument_Barrel"]
+position = Vector2(950, 975)
+scale = Vector2(0.191, 0.191)
+texture = ExtResource("10_a6cnm")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Instrument_Barrel"]
+position = Vector2(949.5, 985.5)
 shape = SubResource("RectangleShape2D_f3117")
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="PlayerNameLabel" type="Label" parent="Control"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="ScoreLabel" type="Label" parent="Control"]
+offset_right = 40.0
+offset_bottom = 23.0
