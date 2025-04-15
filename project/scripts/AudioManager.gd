@@ -25,5 +25,8 @@ func play_level_music(music: AudioStream):
 	music_player.stream = music
 	music_player.play()
 
+func stop_music():
+	music_player.stop()
+
 func stop_level_music():
 	play_global_music()

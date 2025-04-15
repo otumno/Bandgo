@@ -1,7 +1,8 @@
-[gd_scene load_steps=9 format=3 uid="uid://crxvqga1dtvbn"]
+[gd_scene load_steps=11 format=3 uid="uid://crxvqga1dtvbn"]
 
 [ext_resource type="Script" uid="uid://chnxutp3hdm6t" path="res://project/scripts/SceneAudioHandler.gd" id="1_cqeua"]
 [ext_resource type="Texture2D" uid="uid://cbweq7e7c7pcd" path="res://project/assets/textures/6f018d8a158211f0a4402e814483879f_1.jpg" id="1_kgxh5"]
+[ext_resource type="AudioStream" uid="uid://cgbv1cipijf0y" path="res://project/assets/sounds/703137__deadrobotmusic__ambient-piano-guitar-texture-e.ogg" id="2_f3117"]
 [ext_resource type="Theme" uid="uid://3pqwyww8rrpc" path="res://project/themes/new_theme.tres" id="4_cqeua"]
 [ext_resource type="Script" uid="uid://ic6623dcahtt" path="res://project/scripts/GameBackButton.gd" id="4_m7itv"]
 [ext_resource type="AudioStream" uid="uid://b3frfc43b7rdu" path="res://project/assets/sounds/zapsplat_musical_guitar_acoustic_nylon_grab_neck_strings_002_56231.mp3" id="6_m7itv"]
@@ -9,9 +10,13 @@
 [ext_resource type="AudioStream" uid="uid://ewwcwvre4fig" path="res://project/assets/sounds/Tac.mp3" id="8_a6cnm"]
 [ext_resource type="AudioStream" uid="uid://hd3rxq44mh6f" path="res://project/assets/sounds/Tic.mp3" id="9_xewpq"]
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_f3117"]
+size = Vector2(88, 115)
+
 [node name="Game" type="Node2D"]
 script = ExtResource("1_cqeua")
 use_local_music = true
+local_music = ExtResource("2_f3117")
 
 [node name="TextureRect" type="TextureRect" parent="."]
 offset_right = 1920.0
@@ -38,3 +43,9 @@ script = ExtResource("7_f3117")
 bpm = 100
 metronome_pattern = Array[int]([1, 2, 2, 2])
 metronome_sounds = Array[AudioStream]([ExtResource("8_a6cnm"), ExtResource("9_xewpq")])
+
+[node name="Area2D" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+position = Vector2(-68, 124)
+shape = SubResource("RectangleShape2D_f3117")

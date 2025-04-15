@@ -26,6 +26,16 @@ func _on_button_pressed() -> void:
 	if is_transitioning:
 		return
 	
+	# Останавливаем музыку сразу при нажатии (только для выхода из игры)
+	if transition_mode == TransitionType.QUIT:
+		var audio_manager = get_node("/root/AudioManager")
+		if audio_manager:
+			audio_manager.stop_music()
+	
+	# Воспроизводим звук нажатия
+	if transition_sound:
+		audio_player.play()
+	
 	await start_transition()
 
 func start_transition() -> void:
@@ -43,16 +53,10 @@ func start_transition() -> void:
 	fade_rect.z_index = 1000
 	viewport.add_child(fade_rect)
 
-	# Создаем твин с параллельными анимациями
-	var tween := create_tween().set_parallel(true)  # Ключевое изменение!
-	
-	# Запускаем звук и анимацию одновременно
-	if transition_sound:
-		audio_player.play()
-		# Не ждем окончания звука, он играет параллельно
-	
+	# Анимация затемнения
+	var tween := create_tween()
 	tween.tween_property(fade_rect, "color:a", 1.0, transition_duration)
-	await tween.finished  # Ждем только завершения анимации
+	await tween.finished
 
 	# Выполняем действие после завершения анимации
 	match transition_mode:
