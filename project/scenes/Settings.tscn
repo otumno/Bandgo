@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=3 uid="uid://ctmu7som52is8"]
+[gd_scene load_steps=7 format=3 uid="uid://ctmu7som52is8"]
 
 [ext_resource type="Script" uid="uid://chnxutp3hdm6t" path="res://project/scripts/SceneAudioHandler.gd" id="1_f4qhj"]
 [ext_resource type="Texture2D" uid="uid://bcyhrjy1j7hmr" path="res://project/assets/textures/1d71f10d158211f0a0f4d27cdd667232_1.jpg" id="1_tm1kl"]
 [ext_resource type="Script" uid="uid://c76uhy1vlvt8" path="res://project/scripts/PulsingBackground.gd" id="2_frogo"]
 [ext_resource type="Theme" uid="uid://3pqwyww8rrpc" path="res://project/themes/new_theme.tres" id="4_2rv71"]
 [ext_resource type="Script" uid="uid://dthlr8d31egeg" path="res://project/scripts/SceneTransitionButton.gd" id="5_dwab4"]
+[ext_resource type="AudioStream" uid="uid://b3frfc43b7rdu" path="res://project/assets/sounds/zapsplat_musical_guitar_acoustic_nylon_grab_neck_strings_002_56231.mp3" id="6_f4qhj"]
 
 [node name="Settimgs" type="Node2D"]
 script = ExtResource("1_f4qhj")
@@ -17,15 +18,20 @@ script = ExtResource("2_frogo")
 bpm = 100
 beat_pattern = [false, true, true, true, true, false, true, true, true, false, true, true, true, false, true, true]
 max_scale = 1.01
+metadata/_edit_lock_ = true
 
-[node name="Button" type="Button" parent="TextureRect"]
-layout_mode = 0
+[node name="Button" type="Button" parent="."]
+custom_minimum_size = Vector2(319.695, 150)
 offset_left = 802.0
 offset_top = 1064.0
-offset_right = 985.0
+offset_right = 1008.0
 offset_bottom = 1163.0
 theme = ExtResource("4_2rv71")
 action_mode = 0
 text = "BACK"
 script = ExtResource("5_dwab4")
+target_scene_path = "uid://drwceegmg3f64"
+transition_sound = ExtResource("6_f4qhj")
+transition_duration = 0.3
+fade_color = Color(1, 1, 1, 1)
 metadata/_edit_use_anchors_ = true

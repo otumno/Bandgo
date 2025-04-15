@@ -39,20 +39,21 @@ target_scene = "res://project/scenes/Game.tscn"
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 414.0
-offset_top = 690.0
+offset_top = 544.0
 offset_right = 1498.0
 offset_bottom = 1202.0
 script = ExtResource("4_vuudk")
 
 [node name="Panel" type="Panel" parent="SlotManager/SlotUI"]
-custom_minimum_size = Vector2(0, 100)
+custom_minimum_size = Vector2(0, 122.045)
 layout_mode = 2
 
 [node name="Title" type="Label" parent="SlotManager/SlotUI/Panel"]
 layout_mode = 2
-offset_top = 4.0
-offset_right = 1083.0
-offset_bottom = 78.0
+offset_left = 0.085
+offset_top = 17.395
+offset_right = 1083.08
+offset_bottom = 91.395
 theme = ExtResource("3_da7fl")
 theme_override_colors/font_color = Color(1, 0, 0, 1)
 text = "SAVE SLOTS"
@@ -61,7 +62,7 @@ vertical_alignment = 1
 
 [node name="HBoxContainer" type="HBoxContainer" parent="SlotManager/SlotUI"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 100)
+custom_minimum_size = Vector2(0, 150)
 layout_mode = 2
 
 [node name="Slot1Button" type="Button" parent="SlotManager/SlotUI/HBoxContainer"]
@@ -69,18 +70,19 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(800, 0)
 layout_mode = 2
 theme = ExtResource("3_da7fl")
-theme_override_font_sizes/font_size = 40
+theme_override_font_sizes/font_size = 50
 
 [node name="DeleteSlot1" type="Button" parent="SlotManager/SlotUI/HBoxContainer"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(280, 0)
 layout_mode = 2
 theme = ExtResource("3_da7fl")
-theme_override_font_sizes/font_size = 40
+theme_override_font_sizes/font_size = 50
+text = "DELETE"
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="SlotManager/SlotUI"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 100)
+custom_minimum_size = Vector2(0, 150)
 layout_mode = 2
 
 [node name="Slot2Button" type="Button" parent="SlotManager/SlotUI/HBoxContainer2"]
@@ -88,18 +90,19 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(800, 0)
 layout_mode = 2
 theme = ExtResource("3_da7fl")
-theme_override_font_sizes/font_size = 40
+theme_override_font_sizes/font_size = 50
 
 [node name="DeleteSlot2" type="Button" parent="SlotManager/SlotUI/HBoxContainer2"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(280, 0)
 layout_mode = 2
 theme = ExtResource("3_da7fl")
-theme_override_font_sizes/font_size = 40
+theme_override_font_sizes/font_size = 50
+text = "DELETE"
 
 [node name="HBoxContainer3" type="HBoxContainer" parent="SlotManager/SlotUI"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 100)
+custom_minimum_size = Vector2(0, 150)
 layout_mode = 2
 
 [node name="Slot3Button" type="Button" parent="SlotManager/SlotUI/HBoxContainer3"]
@@ -107,16 +110,18 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(800, 0)
 layout_mode = 2
 theme = ExtResource("3_da7fl")
-theme_override_font_sizes/font_size = 40
+theme_override_font_sizes/font_size = 50
 
 [node name="DeleteSlot3" type="Button" parent="SlotManager/SlotUI/HBoxContainer3"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(280, 0)
 layout_mode = 2
 theme = ExtResource("3_da7fl")
-theme_override_font_sizes/font_size = 40
+theme_override_font_sizes/font_size = 50
+text = "DELETE"
 
 [node name="BackButton" type="Button" parent="SlotManager/SlotUI"]
+custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 theme = ExtResource("3_da7fl")
 action_mode = 0
@@ -130,9 +135,8 @@ metadata/_edit_use_anchors_ = true
 
 [node name="ConfirmDialog" type="ConfirmationDialog" parent="SlotManager"]
 unique_name_in_owner = true
-position = Vector2i(300, 500)
+position = Vector2i(325, 410)
 size = Vector2i(1300, 400)
-visible = true
 borderless = true
 theme = ExtResource("3_da7fl")
 script = ExtResource("7_776cj")
