@@ -1,57 +1,54 @@
 extends Node
 
-const SAVE_PATH := "user://save_data_%d.dat"  # Используем := для типизированных констант
-
-var current_slot : int = 0
-var player_name : String = ""
-var fame : int = 0
+const SAVE_PATH = "user://saves/"
 
 func save_game(slot: int) -> bool:
-	var save_data := {
-		"player_name": player_name,
-		"fame": fame,
-		"timestamp": Time.get_unix_time_from_system()  # Заменяем OS на Time
-	}
-	
-	var file := FileAccess.open(SAVE_PATH % slot, FileAccess.WRITE)
-	if file:
-		file.store_var(save_data)
-		return true
-	else:
-		push_error("Error saving game: ", FileAccess.get_open_error())
+	if not DirAccess.dir_exists_absolute(SAVE_PATH):
+		DirAccess.make_dir_recursive_absolute(SAVE_PATH)
+
+	var file = FileAccess.open(_get_save_path(slot), FileAccess.WRITE)
+	if not file:
+		push_error("Ошибка создания файла сохранения!")
 		return false
+
+	var gm = get_node("/root/GameManager")
+	file.store_var({
+		"player_name": gm.player_name,
+		"score": gm.score,
+		"timestamp": Time.get_unix_time_from_system()
+	})
+	return true
 
 func load_game(slot: int) -> bool:
-	if not FileAccess.file_exists(SAVE_PATH % slot):
-		return false
-		
-	var file := FileAccess.open(SAVE_PATH % slot, FileAccess.READ)
-	if file:
-		var save_data = file.get_var()
-		player_name = save_data["player_name"]
-		fame = save_data["fame"]
-		current_slot = slot
-		return true
-	else:
-		push_error("Error loading game: ", FileAccess.get_open_error())
+	var path = _get_save_path(slot)
+	if not FileAccess.file_exists(path):
 		return false
 
-func delete_save(slot: int) -> bool:
-	if FileAccess.file_exists(SAVE_PATH % slot):
-		DirAccess.remove_absolute(SAVE_PATH % slot)  # Заменяем Directory на DirAccess
-		return true
-	return false
+	var file = FileAccess.open(path, FileAccess.READ)
+	var save_data = file.get_var()
+
+	var gm = get_node("/root/GameManager")
+	gm.player_name = save_data.get("player_name", "Player")
+	gm.score = save_data.get("score", 0)
+	gm.current_slot = slot
+	return true
 
 func get_save_info(slot: int) -> Dictionary:
-	if not FileAccess.file_exists(SAVE_PATH % slot):
+	var path = _get_save_path(slot)
+	if not FileAccess.file_exists(path):
 		return {}
-		
-	var file := FileAccess.open(SAVE_PATH % slot, FileAccess.READ)
-	if file:
-		var save_data = file.get_var()
-		return {
-			"player_name": save_data["player_name"],
-			"fame": save_data["fame"],
-			"timestamp": save_data.get("timestamp", 0)
-		}
-	return {}
+
+	var file = FileAccess.open(path, FileAccess.READ)
+	var data = file.get_var()
+	return data if typeof(data) == TYPE_DICTIONARY else {}
+
+func delete_save(slot: int) -> bool:
+	var path = _get_save_path(slot)
+	if FileAccess.file_exists(path):
+		var dir = DirAccess.open("user://")
+		if dir:
+			return dir.remove(path) == OK
+	return false
+
+func _get_save_path(slot: int) -> String:
+	return SAVE_PATH + "save_%d.dat" % slot

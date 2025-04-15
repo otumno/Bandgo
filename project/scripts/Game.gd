@@ -1,19 +1,25 @@
 extends Node2D
 
-@onready var player_name_label: Label = %PlayerNameLabel
-@onready var fame_label: Label = %FameLabel
+@onready var bpm_manager = $BPM_Manager
+@onready var score_label = $UI/ScoreLabel
+@onready var name_label = $UI/NameLabel
 
-func _ready() -> void:
-	update_player_info()
-	if SaveSystem.player_name.is_empty():
-		get_tree().change_scene_to_file("res://scenes/SlotSelection.tscn")
+func _ready():
+	var gm = get_node("/root/GameManager")
+	update_ui(gm)
+	
+	for instrument in $Instruments.get_children():
+		instrument.input_event.connect(_on_first_click)
 
-func update_player_info() -> void:
-	player_name_label.text = SaveSystem.player_name
-	fame_label.text = "%d Fame" % SaveSystem.fame
+func _on_first_click():
+	bpm_manager.start()
+	for instrument in $Instruments.get_children():
+		instrument.input_event.disconnect(_on_first_click)
 
-func on_click() -> void:
-	SaveSystem.fame += 1
-	update_player_info()
-	if SaveSystem.fame % 10 == 0:
-		SaveSystem.save_game(SaveSystem.current_slot)
+func update_ui(gm: Node):
+	score_label.text = "Score: %d" % gm.score
+	name_label.text = "Player: %s" % gm.player_name
+
+func _on_back_button_pressed():
+	get_node("/root/SaveSystem").force_save()
+	get_node("/root/SceneManager").load_scene("res://scenes/MainMenu.tscn")

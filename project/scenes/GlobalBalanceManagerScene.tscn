@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://cwhfqf3sdsppo"]
+
+[ext_resource type="Script" uid="uid://ef5rtr3y2k1i" path="res://project/scripts/GlobalBalanceManager.gd" id="1_bvonl"]
+
+[node name="GlobalBalanceManagerScene" type="Node2D"]
+script = ExtResource("1_bvonl")

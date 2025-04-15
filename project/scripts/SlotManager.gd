@@ -1,9 +1,10 @@
 extends Control
 
-signal game_loaded(slot_number: int)
-signal save_deleted(slot_number: int)
+@export_category("Transition Settings")
+@export var transition_sound: AudioStream
+@export var fade_duration: float = 0.5
+@export var fade_color: Color = Color.BLACK
 
-# Элементы UI
 @onready var slot_buttons: Array[Button] = [
 	$SlotUI/HBoxContainer/Slot1Button,
 	$SlotUI/HBoxContainer2/Slot2Button,
@@ -21,112 +22,124 @@ signal save_deleted(slot_number: int)
 @onready var name_input: LineEdit = $NameDialog/VBoxContainer/NameEdit
 @onready var name_ok_button: Button = $NameDialog/VBoxContainer/HBoxContainer/OKButton
 
-# Настройки перехода
-@export var transition_sound: AudioStream
-@export var fade_duration: float = 0.5
-@export var target_scene: String = "res://Game.tscn"
-
 var current_slot := 0
+var _is_transitioning := false
 
-func _ready() -> void:
+func _ready():
 	_setup_dialogs()
 	_connect_signals()
 	update_slots_display()
 
-func _setup_dialogs() -> void:
-	# Настройка ConfirmDialog (встроенный ConfirmationDialog)
-	confirm_dialog.dialog_autowrap = true
-	confirm_dialog.get_label().horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	confirm_dialog.get_ok_button().text = "Да"
-	confirm_dialog.get_cancel_button().text = "Отмена"
-	
-	# Настройка NameDialog
+func _setup_dialogs():
+	confirm_dialog.dialog_text = "Удалить сохранение?"
 	name_dialog.title = "Введите имя игрока"
 
-func _connect_signals() -> void:
+func _connect_signals():
 	for i in 3:
 		slot_buttons[i].pressed.connect(_on_slot_pressed.bind(i + 1))
 		delete_buttons[i].pressed.connect(_on_delete_pressed.bind(i + 1))
 	
+	name_input.text_submitted.connect(_on_name_confirmed)
 	name_ok_button.pressed.connect(_on_name_confirmed)
-	name_input.text_submitted.connect(_on_name_submitted)
-	
-	# Подключаем сигналы ConfirmationDialog
-	confirm_dialog.confirmed.connect(_on_confirm_dialog_confirmed)
+	confirm_dialog.confirmed.connect(_on_confirm_delete)
 
-func update_slots_display() -> void:
+func update_slots_display():
 	for i in 3:
-		var slot_num := i + 1
-		var save_info := SaveSystem.get_save_info(slot_num)
-		
+		var save_info = SaveSystem.get_save_info(i + 1)
 		if save_info.is_empty():
-			slot_buttons[i].text = "Slot %d" % slot_num
+			slot_buttons[i].text = "Слот %d" % (i + 1)
 			delete_buttons[i].visible = false
 		else:
-			slot_buttons[i].text = "%s\n%d Fame" % [save_info["player_name"], save_info["fame"]]
+			slot_buttons[i].text = "%s\nОчки: %d" % [
+				save_info.get("player_name", ""),
+				save_info.get("score", 0)
+			]
 			delete_buttons[i].visible = true
 
-func _on_slot_pressed(slot_number: int) -> void:
-	var save_info := SaveSystem.get_save_info(slot_number)
+func _on_slot_pressed(slot_number: int):
+	if _is_transitioning: return
+	current_slot = slot_number
+	
+	var save_info = SaveSystem.get_save_info(slot_number)
 	if save_info.is_empty():
-		current_slot = slot_number
-		name_input.text = ""
+		name_input.clear()
 		name_dialog.popup_centered()
 		name_input.grab_focus()
 	else:
-		if SaveSystem.load_game(slot_number):
-			_transition_to_game(slot_number)
+		_start_game_transition()
 
-func _on_delete_pressed(slot_number: int) -> void:
-	confirm_dialog.dialog_text = "Удалить сохранение в слоте %d?" % slot_number
+func _on_delete_pressed(slot_number: int):
+	current_slot = slot_number
 	confirm_dialog.popup_centered()
-	var confirmed: bool = await confirm_dialog.confirmed
-	if confirmed and SaveSystem.delete_save(slot_number):
-		save_deleted.emit(slot_number)
+
+func _on_confirm_delete():
+	if SaveSystem.delete_save(current_slot):
 		update_slots_display()
 
-func _on_confirm_dialog_confirmed() -> void:
-	# Обработка подтверждения в диалоге
-	pass
-
-func _on_name_confirmed() -> void:
-	_process_name_input()
-
-func _on_name_submitted(_text: String) -> void:
-	_process_name_input()
-
-func _process_name_input() -> void:
-	var player_name := name_input.text.strip_edges()
-	if not player_name.is_empty():
-		SaveSystem.player_name = player_name
-		SaveSystem.fame = 0
-		if SaveSystem.save_game(current_slot):
-			name_dialog.hide()
-			_transition_to_game(current_slot)
-
-func _transition_to_game(slot_number: int) -> void:
-	# Воспроизведение звука перехода
-	if transition_sound:
-		var audio_player = AudioStreamPlayer.new()
-		add_child(audio_player)
-		audio_player.stream = transition_sound
-		audio_player.play()
-		await audio_player.finished
-		audio_player.queue_free()
+func _on_name_confirmed(_text = ""):
+	var name = name_input.text.strip_edges()
+	if name.is_empty(): return
 	
-	# Анимация затемнения
-	var fade_rect = ColorRect.new()
-	fade_rect.color = Color.BLACK
-	fade_rect.size = get_viewport_rect().size
-	fade_rect.modulate.a = 0.0
-	add_child(fade_rect)
+	var gm = get_node("/root/GameManager")
+	gm.player_name = name
+	gm.score = 0
+	gm.current_slot = current_slot
 	
-	var tween = create_tween()
-	tween.tween_property(fade_rect, "modulate:a", 1.0, fade_duration)
+	if SaveSystem.save_game(current_slot):
+		name_dialog.hide()
+		_start_game_transition()
+
+func _start_game_transition():
+	if _is_transitioning: return
+	_is_transitioning = true
+	
+	# 1. Загружаем игру
+	if not SaveSystem.load_game(current_slot):
+		push_error("Ошибка загрузки сохранения!")
+		_is_transitioning = false
+		return
+	
+	# 2. Создаем эффекты перехода
+	var fade_rect = _create_fade_rect()
+	var audio_player = _create_audio_player()
+	
+	# 3. Параллельные анимации
+	var tween = create_tween().set_parallel(true)
+	
+	if audio_player:
+		tween.tween_property(audio_player, "volume_db", 0.0, 0.1)
+	
+	tween.tween_property(fade_rect, "color:a", 1.0, fade_duration)
 	await tween.finished
 	
-	# Переход на сцену
-	get_tree().change_scene_to_file(target_scene)
+	# 4. Переход на сцену
+	var target_scene = "res://project/scenes/Game.tscn"
+	if has_node("/root/SceneTransitionManager"):
+		get_node("/root/SceneTransitionManager").transition_to_scene(target_scene)
+	else:
+		if get_tree().change_scene_to_file(target_scene) != OK:
+			push_error("Ошибка загрузки сцены!")
 	
-	# Оповещение о загрузке игры
-	game_loaded.emit(slot_number)
+	# 5. Очистка
+	if is_instance_valid(fade_rect):
+		fade_rect.queue_free()
+
+func _create_fade_rect() -> ColorRect:
+	var fade_rect = ColorRect.new()
+	fade_rect.color = fade_color
+	fade_rect.color.a = 0.0
+	fade_rect.size = get_tree().root.size
+	fade_rect.z_index = 1000
+	fade_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	get_tree().root.add_child(fade_rect)
+	return fade_rect
+
+func _create_audio_player() -> AudioStreamPlayer:
+	if not transition_sound: return null
+	
+	var player = AudioStreamPlayer.new()
+	player.stream = transition_sound
+	player.volume_db = -80.0
+	add_child(player)
+	player.play()
+	return player

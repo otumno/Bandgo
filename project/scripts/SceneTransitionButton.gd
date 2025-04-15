@@ -32,24 +32,29 @@ func start_transition() -> void:
 	is_transitioning = true
 	disabled = true
 
-	# Воспроизведение звука
-	if transition_sound:
-		audio_player.play()
-
-	# Создаем затемнение
+	# Получаем корневой Viewport
+	var viewport = get_tree().root
+	
+	# Создаем эффект затемнения
 	var fade_rect := ColorRect.new()
 	fade_rect.color = fade_color
 	fade_rect.color.a = 0.0
-	fade_rect.size = get_viewport_rect().size
-	fade_rect.z_index = 1000  # Поверх всех элементов
-	get_tree().root.add_child(fade_rect)
+	fade_rect.size = viewport.size
+	fade_rect.z_index = 1000
+	viewport.add_child(fade_rect)
 
-	# Анимация
-	var tween := create_tween()
+	# Создаем твин с параллельными анимациями
+	var tween := create_tween().set_parallel(true)  # Ключевое изменение!
+	
+	# Запускаем звук и анимацию одновременно
+	if transition_sound:
+		audio_player.play()
+		# Не ждем окончания звука, он играет параллельно
+	
 	tween.tween_property(fade_rect, "color:a", 1.0, transition_duration)
-	await tween.finished
+	await tween.finished  # Ждем только завершения анимации
 
-	# Выполняем действие
+	# Выполняем действие после завершения анимации
 	match transition_mode:
 		TransitionType.SCENE:
 			if target_scene_path and ResourceLoader.exists(target_scene_path):
