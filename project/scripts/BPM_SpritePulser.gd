@@ -18,7 +18,7 @@ var _current_beat: int = 0
 
 func _ready():
 	# Инициализация BPM Manager
-	_bpm_manager = get_node("/root/BpmManager")
+	_bpm_manager = BPM_GlobalManager as BPM_Manager
 	if not _bpm_manager:
 		push_error("BPM Manager not found!")
 		return

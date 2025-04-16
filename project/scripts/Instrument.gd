@@ -11,6 +11,10 @@ class_name Instrument
 @export var in_rhythm_multiplier: float = 2.0
 @export var rhythm_window_ms: float = 100.0
 
+@export_category("Pattern Analysis")
+@export var required_matches: int = 2  # Сколько раз должен повториться паттерн
+@export var analysis_window: int = 4   # Количество тактов для анализа
+
 @export_category("Visual Feedback")
 @export var feedback_scale: float = 1.1
 @export var feedback_duration: float = 0.15
@@ -23,8 +27,12 @@ var sprite: Sprite2D
 var audio_player: AudioStreamPlayer
 var bpm_manager: BPM_Manager
 
+# Для анализа паттернов
+var input_buffer: Array[int] = []
+var detected_pattern: Array[int] = []
+var match_count: int = 0
+
 func _ready():
-	# Инициализация компонентов
 	_initialize_audio_player()
 	_find_sprite()
 	_setup_bpm_manager()
@@ -42,23 +50,20 @@ func _find_sprite():
 			break
 
 func _setup_bpm_manager():
-	bpm_manager = _get_bpm_manager()
+	bpm_manager = BPM_GlobalManager as BPM_Manager
+	
 	if bpm_manager:
 		print("BPM Manager connected successfully")
 	else:
-		push_error("BPM Manager not found!")
-
-func _get_bpm_manager() -> BPM_Manager:
-	if get_node("/root").has_node("BpmManager"):
-		var manager = get_node("/root/BpmManager")
-		if manager is BPM_Manager:
-			return manager
+		push_error("BPM Manager not found in autoload!")
 	
-	var managers = get_tree().get_nodes_in_group("BPM_Manager")
-	if not managers.is_empty() and managers[0] is BPM_Manager:
-		return managers[0]
-	
-	return null
+	# Получаем PatternAnalyzer из текущей сцены
+	var pattern_analyzer = $PatternAnalyzer if has_node("PatternAnalyzer") else null
+	if pattern_analyzer and pattern_analyzer.has_signal("pattern_detected"):
+		pattern_analyzer.pattern_detected.connect(_on_pattern_detected)
+		print("Connected signal 'pattern_detected'")
+	else:
+		push_warning("PatternAnalyzer not found or missing signal 'pattern_detected'")
 
 func _connect_input():
 	input_event.connect(_on_input_event)
@@ -74,6 +79,7 @@ func _on_input_event(_viewport, event, _shape_idx):
 
 func _handle_click():
 	var current_time = Time.get_ticks_msec()
+	var current_beat = bpm_manager.current_beat if bpm_manager else -1
 	
 	if is_first_click and bpm_manager:
 		bpm_manager.start_metronome()
@@ -84,8 +90,52 @@ func _handle_click():
 	else:
 		_handle_regular_click(current_time)
 	
+	# Добавляем текущий такт в буфер для анализа паттернов
+	if current_beat != -1:
+		input_buffer.append(current_beat)
+		while input_buffer.size() > analysis_window:
+			input_buffer.remove_at(0)
+		
+		# Проверяем паттерн
+		_check_pattern()
+	
 	last_hit_time = current_time
 	_play_visual_feedback()
+
+func _check_pattern():
+	if input_buffer.size() < analysis_window:
+		print("Buffer too small:", input_buffer)
+		return
+	
+	if bpm_manager and bpm_manager.check_pattern(input_buffer):
+		match_count += 1
+		print("Pattern match detected! Match count:", match_count)
+	else:
+		match_count = 0
+		print("No pattern match. Resetting match count.")
+	
+	if match_count >= required_matches:
+		detected_pattern = input_buffer.duplicate()
+		match_count = 0
+		print("Starting automation with pattern:", detected_pattern)
+		_start_automation(detected_pattern)
+
+func _start_automation(pattern: Array):
+	print("Automating pattern:", pattern)
+	for beat in pattern:
+		await get_tree().create_timer(60.0 / bpm_manager.bpm).timeout
+		if correct_sound_pattern.is_empty():
+			push_error("Correct sound pattern is empty!")
+			return
+		
+		var sound_index = beat % correct_sound_pattern.size()
+		audio_player.stream = correct_sound_pattern[sound_index]
+		audio_player.play()
+		print("Playing sound at index:", sound_index)
+
+func _on_pattern_detected(pattern: Array):
+	print("Pattern detected in Instrument:", pattern)
+	_start_automation(pattern)
 
 func _handle_first_click():
 	if first_click_sound:
