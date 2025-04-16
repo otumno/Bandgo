@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://crxvqga1dtvbn"]
+[gd_scene load_steps=20 format=3 uid="uid://crxvqga1dtvbn"]
 
 [ext_resource type="Script" uid="uid://chnxutp3hdm6t" path="res://project/scripts/SceneAudioHandler.gd" id="1_cqeua"]
 [ext_resource type="Texture2D" uid="uid://cbweq7e7c7pcd" path="res://project/assets/textures/6f018d8a158211f0a4402e814483879f_1.jpg" id="1_kgxh5"]
@@ -11,12 +11,13 @@
 [ext_resource type="AudioStream" uid="uid://hd3rxq44mh6f" path="res://project/assets/sounds/Tic.mp3" id="9_xewpq"]
 [ext_resource type="Texture2D" uid="uid://degv8ksy8ppva" path="res://project/assets/textures/—Pngtree—iron drum_4431249.png" id="10_a6cnm"]
 [ext_resource type="Script" uid="uid://cyi4htwqahhjt" path="res://project/scripts/Instrument.gd" id="10_mvo24"]
-[ext_resource type="AudioStream" uid="uid://cks06x3rce5ct" path="res://project/assets/sounds/791446__micah10__floor-tom-16.wav" id="11_qo2pe"]
-[ext_resource type="AudioStream" uid="uid://dpjry6d4p7730" path="res://project/assets/sounds/steel-bench-hit4-89132.mp3" id="12_5gtpa"]
+[ext_resource type="AudioStream" uid="uid://b8obbfx45w55r" path="res://project/assets/sounds/Barrel_Tom.ogg" id="14_nooqs"]
 [ext_resource type="Script" uid="uid://df1wy3kgm5iwy" path="res://project/scripts/PlayerUI.gd" id="14_qo2pe"]
+[ext_resource type="AudioStream" uid="uid://cexwuu2jf8lbn" path="res://project/assets/sounds/Barrel_Fail.ogg" id="15_ftep8"]
 [ext_resource type="Script" uid="uid://cckliyyl5npbh" path="res://project/scripts/BPM_SpritePulser.gd" id="15_nooqs"]
 [ext_resource type="Texture2D" uid="uid://bwobsrgdgjyrg" path="res://project/assets/textures/FRAME_1.png" id="16_ftep8"]
 [ext_resource type="Texture2D" uid="uid://dv6pg3jv73gwi" path="res://project/assets/textures/FRAME_2.png" id="17_27fkg"]
+[ext_resource type="AudioStream" uid="uid://cr5hogfgnr608" path="res://project/assets/sounds/622224__nlux__nlux-hippy-tom-tom-19-gb1.wav" id="17_ftep8"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_f3117"]
 size = Vector2(149, 241)
@@ -76,9 +77,10 @@ metronome_sounds = Array[AudioStream]([ExtResource("8_a6cnm"), ExtResource("9_xe
 
 [node name="Instrument_Barrel" type="Area2D" parent="."]
 script = ExtResource("10_mvo24")
-correct_sound_pattern = Array[AudioStream]([ExtResource("11_qo2pe"), ExtResource("11_qo2pe")])
-fail_sound = ExtResource("12_5gtpa")
-first_click_sound = ExtResource("11_qo2pe")
+correct_sound_pattern = Array[AudioStream]([ExtResource("14_nooqs"), ExtResource("14_nooqs")])
+fail_sound = ExtResource("15_ftep8")
+first_click_sound = ExtResource("14_nooqs")
+rhythm_window_ms = 70.0
 
 [node name="Sprite2D" type="Sprite2D" parent="Instrument_Barrel"]
 position = Vector2(950, 975)
@@ -87,6 +89,22 @@ texture = ExtResource("10_a6cnm")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Instrument_Barrel"]
 position = Vector2(949.5, 985.5)
+shape = SubResource("RectangleShape2D_f3117")
+
+[node name="Instrument_Barrel2" type="Area2D" parent="."]
+script = ExtResource("10_mvo24")
+correct_sound_pattern = Array[AudioStream]([ExtResource("17_ftep8"), ExtResource("17_ftep8")])
+fail_sound = ExtResource("15_ftep8")
+first_click_sound = ExtResource("17_ftep8")
+rhythm_window_ms = 70.0
+
+[node name="Sprite2D" type="Sprite2D" parent="Instrument_Barrel2"]
+position = Vector2(1185, 903)
+scale = Vector2(0.191, 0.191)
+texture = ExtResource("10_a6cnm")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Instrument_Barrel2"]
+position = Vector2(1185, 916)
 shape = SubResource("RectangleShape2D_f3117")
 
 [node name="Control" type="Control" parent="." node_paths=PackedStringArray("player_name_label", "score_label")]
