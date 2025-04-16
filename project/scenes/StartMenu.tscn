@@ -14,34 +14,33 @@
 [node name="Control" type="Control" parent="."]
 layout_mode = 3
 anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_right = 1920.0
+offset_bottom = 1200.0
+metadata/_edit_use_anchors_ = true
 
 [node name="TextureRect" type="TextureRect" parent="Control"]
-layout_mode = 0
-offset_right = 1920.0
-offset_bottom = 1281.0
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 texture = ExtResource("1_w4ch6")
 script = ExtResource("3_n7fgp")
 bpm = 100
 beat_pattern = [false, true, true, true, false, true, true, true, false, true, true, true, false, true, true]
 max_scale = 1.01
-metadata/_edit_lock_ = true
+metadata/_edit_use_anchors_ = true
 
 [node name="Label" type="Label" parent="Control"]
 top_level = true
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -692.0
-offset_top = -611.0
-offset_right = 956.0
-offset_bottom = -193.0
-grow_horizontal = 2
-grow_vertical = 2
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -1648.0
+offset_bottom = 418.0
+grow_horizontal = 0
 scale = Vector2(0.865, 0.865)
 theme = ExtResource("3_a40we")
 theme_override_colors/font_color = Color(0.992157, 0, 0, 1)
@@ -50,98 +49,30 @@ theme_override_constants/shadow_offset_x = 14
 theme_override_constants/shadow_offset_y = 12
 theme_override_font_sizes/font_size = 400
 text = "BANDGO"
-horizontal_alignment = 1
-vertical_alignment = 1
+horizontal_alignment = 3
+vertical_alignment = 3
+visible_ratio = -0.166667
+metadata/_edit_use_anchors_ = true
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Control"]
 layout_mode = 1
-anchors_preset = 7
+anchors_preset = 8
 anchor_left = 0.5
-anchor_top = 1.0
+anchor_top = 0.5
 anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = 2031.0
-offset_top = 817.0
-offset_right = 2157.0
-offset_bottom = 843.0
+anchor_bottom = 0.5
+offset_left = -237.5
+offset_top = -100.0
+offset_right = 237.5
+offset_bottom = 517.0
 grow_horizontal = 2
-grow_vertical = 0
-scale = Vector2(3.87974, 4.30884)
+grow_vertical = 2
 theme = ExtResource("3_a40we")
+alignment = 1
 
-[node name="ButtonHelp" type="Button" parent="Control"]
+[node name="ButtonGame" type="Button" parent="Control/VBoxContainer"]
 custom_minimum_size = Vector2(400, 150)
 layout_mode = 2
-offset_left = 677.0
-offset_top = 760.0
-offset_right = 1152.0
-offset_bottom = 910.0
-theme = ExtResource("3_a40we")
-theme_override_colors/font_color = Color(0, 0.796078, 0, 1)
-theme_override_font_sizes/font_size = 80
-theme_override_styles/focus = ExtResource("5_rsqw1")
-theme_override_styles/hover_pressed = ExtResource("5_rsqw1")
-theme_override_styles/hover = ExtResource("4_7o7kn")
-theme_override_styles/pressed = ExtResource("5_rsqw1")
-theme_override_styles/normal = ExtResource("5_rsqw1")
-text = "HELP"
-script = ExtResource("4_v6lke")
-target_scene_path = "uid://chr1pwq6ntvg"
-transition_sound = ExtResource("7_kotb3")
-transition_duration = 0.3
-fade_color = Color(1, 1, 1, 1)
-
-[node name="ButtonExit" type="Button" parent="Control"]
-custom_minimum_size = Vector2(400, 150)
-layout_mode = 2
-offset_left = 677.0
-offset_top = 921.0
-offset_right = 1152.0
-offset_bottom = 1071.0
-theme = ExtResource("3_a40we")
-theme_override_colors/font_color = Color(0.87173, 0.483607, 0.0931894, 1)
-theme_override_font_sizes/font_size = 80
-theme_override_styles/focus = ExtResource("5_rsqw1")
-theme_override_styles/hover_pressed = ExtResource("5_rsqw1")
-theme_override_styles/hover = ExtResource("4_7o7kn")
-theme_override_styles/pressed = ExtResource("5_rsqw1")
-theme_override_styles/normal = ExtResource("5_rsqw1")
-text = "EXIT"
-icon_alignment = 1
-script = ExtResource("4_v6lke")
-transition_mode = 1
-transition_sound = ExtResource("5_7o7kn")
-fade_color = Color(1, 1, 1, 1)
-
-[node name="ButtonSettings" type="Button" parent="Control"]
-custom_minimum_size = Vector2(400, 150)
-layout_mode = 2
-offset_left = 677.0
-offset_top = 610.0
-offset_right = 1152.0
-offset_bottom = 760.0
-theme = ExtResource("3_a40we")
-theme_override_colors/font_color = Color(0.634923, 0.266941, 0.886529, 1)
-theme_override_font_sizes/font_size = 80
-theme_override_styles/focus = ExtResource("5_rsqw1")
-theme_override_styles/hover_pressed = ExtResource("5_rsqw1")
-theme_override_styles/hover = ExtResource("4_7o7kn")
-theme_override_styles/pressed = ExtResource("5_rsqw1")
-theme_override_styles/normal = ExtResource("5_rsqw1")
-text = "SETTINGS"
-script = ExtResource("4_v6lke")
-target_scene_path = "uid://ctmu7som52is8"
-transition_sound = ExtResource("7_kotb3")
-transition_duration = 0.3
-fade_color = Color(1, 1, 1, 1)
-
-[node name="ButtonGame" type="Button" parent="Control"]
-custom_minimum_size = Vector2(400, 150)
-layout_mode = 2
-offset_left = 677.0
-offset_top = 455.0
-offset_right = 1152.0
-offset_bottom = 610.0
 theme = ExtResource("3_a40we")
 theme_override_colors/font_color = Color(1, 0, 0, 1)
 theme_override_font_sizes/font_size = 100
@@ -157,3 +88,61 @@ target_scene_path = "res://project/scenes/SlotSelection.tscn"
 transition_sound = ExtResource("7_kotb3")
 transition_duration = 0.3
 fade_color = Color(1, 1, 1, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="ButtonSettings" type="Button" parent="Control/VBoxContainer"]
+custom_minimum_size = Vector2(400, 150)
+layout_mode = 2
+theme = ExtResource("3_a40we")
+theme_override_colors/font_color = Color(0.634923, 0.266941, 0.886529, 1)
+theme_override_font_sizes/font_size = 80
+theme_override_styles/focus = ExtResource("5_rsqw1")
+theme_override_styles/hover_pressed = ExtResource("5_rsqw1")
+theme_override_styles/hover = ExtResource("4_7o7kn")
+theme_override_styles/pressed = ExtResource("5_rsqw1")
+theme_override_styles/normal = ExtResource("5_rsqw1")
+text = "SETTINGS"
+script = ExtResource("4_v6lke")
+target_scene_path = "uid://ctmu7som52is8"
+transition_sound = ExtResource("7_kotb3")
+transition_duration = 0.3
+fade_color = Color(1, 1, 1, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="ButtonHelp" type="Button" parent="Control/VBoxContainer"]
+custom_minimum_size = Vector2(400, 150)
+layout_mode = 2
+theme = ExtResource("3_a40we")
+theme_override_colors/font_color = Color(0, 0.796078, 0, 1)
+theme_override_font_sizes/font_size = 80
+theme_override_styles/focus = ExtResource("5_rsqw1")
+theme_override_styles/hover_pressed = ExtResource("5_rsqw1")
+theme_override_styles/hover = ExtResource("4_7o7kn")
+theme_override_styles/pressed = ExtResource("5_rsqw1")
+theme_override_styles/normal = ExtResource("5_rsqw1")
+text = "HELP"
+script = ExtResource("4_v6lke")
+target_scene_path = "uid://chr1pwq6ntvg"
+transition_sound = ExtResource("7_kotb3")
+transition_duration = 0.3
+fade_color = Color(1, 1, 1, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="ButtonExit" type="Button" parent="Control/VBoxContainer"]
+custom_minimum_size = Vector2(400, 150)
+layout_mode = 2
+theme = ExtResource("3_a40we")
+theme_override_colors/font_color = Color(0.87173, 0.483607, 0.0931894, 1)
+theme_override_font_sizes/font_size = 80
+theme_override_styles/focus = ExtResource("5_rsqw1")
+theme_override_styles/hover_pressed = ExtResource("5_rsqw1")
+theme_override_styles/hover = ExtResource("4_7o7kn")
+theme_override_styles/pressed = ExtResource("5_rsqw1")
+theme_override_styles/normal = ExtResource("5_rsqw1")
+text = "EXIT"
+icon_alignment = 1
+script = ExtResource("4_v6lke")
+transition_mode = 1
+transition_sound = ExtResource("5_7o7kn")
+fade_color = Color(1, 1, 1, 1)
+metadata/_edit_use_anchors_ = true

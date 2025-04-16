@@ -7,7 +7,7 @@
 
 [node name="BpmManager" type="Node"]
 script = ExtResource("1_7n0pn")
-bpm = 100
+bpm = 170
 metronome_pattern = Array[int]([1, 0, 2, 0, 2, 0, 2, 0])
 metronome_sounds = Array[AudioStream]([ExtResource("2_6rr8p"), ExtResource("3_3r4sx"), ExtResource("4_3r4sx")])
 metadata/_custom_type_script = "uid://c75nob438sph0"

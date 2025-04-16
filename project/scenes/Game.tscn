@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://crxvqga1dtvbn"]
+[gd_scene load_steps=19 format=3 uid="uid://crxvqga1dtvbn"]
 
 [ext_resource type="Script" uid="uid://chnxutp3hdm6t" path="res://project/scripts/SceneAudioHandler.gd" id="1_cqeua"]
 [ext_resource type="Texture2D" uid="uid://cbweq7e7c7pcd" path="res://project/assets/textures/6f018d8a158211f0a4402e814483879f_1.jpg" id="1_kgxh5"]
@@ -14,20 +14,44 @@
 [ext_resource type="AudioStream" uid="uid://cks06x3rce5ct" path="res://project/assets/sounds/791446__micah10__floor-tom-16.wav" id="11_qo2pe"]
 [ext_resource type="AudioStream" uid="uid://dpjry6d4p7730" path="res://project/assets/sounds/steel-bench-hit4-89132.mp3" id="12_5gtpa"]
 [ext_resource type="Script" uid="uid://df1wy3kgm5iwy" path="res://project/scripts/PlayerUI.gd" id="14_qo2pe"]
+[ext_resource type="Script" uid="uid://cckliyyl5npbh" path="res://project/scripts/BPM_SpritePulser.gd" id="15_nooqs"]
+[ext_resource type="Texture2D" uid="uid://bwobsrgdgjyrg" path="res://project/assets/textures/FRAME_1.png" id="16_ftep8"]
+[ext_resource type="Texture2D" uid="uid://dv6pg3jv73gwi" path="res://project/assets/textures/FRAME_2.png" id="17_27fkg"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_f3117"]
 size = Vector2(149, 241)
 
-[node name="Game" type="Node2D"]
+[node name="Game" type="Node"]
 script = ExtResource("1_cqeua")
 use_local_music = true
 local_music = ExtResource("2_f3117")
 music_volume = 0.5
 
 [node name="TextureRect" type="TextureRect" parent="."]
-offset_right = 1920.0
-offset_bottom = 1281.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 texture = ExtResource("1_kgxh5")
+
+[node name="SpritePulser" type="Control" parent="." node_paths=PackedStringArray("target_sprite")]
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("15_nooqs")
+target_sprite = NodePath("Sprite2D")
+frame_1_texture = ExtResource("16_ftep8")
+frame_2_texture = ExtResource("17_27fkg")
+pulse_scale = Vector2(1.01, 1.01)
+pulse_duration = 0.1
+
+[node name="Sprite2D" type="Sprite2D" parent="SpritePulser"]
 
 [node name="BackButton" type="Button" parent="."]
 offset_left = 85.0
@@ -84,6 +108,7 @@ theme = ExtResource("4_cqeua")
 vertical_alignment = 1
 
 [node name="ScoreLabel" type="Label" parent="Control"]
+layout_mode = 0
 offset_left = 1452.0
 offset_top = 57.0
 offset_right = 1827.0

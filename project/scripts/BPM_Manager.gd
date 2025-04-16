@@ -41,14 +41,16 @@ func start_metronome():
 	is_playing = true
 	current_beat = 0
 	_process_beat()
-	beat_timer.timeout.connect(_process_beat)
+	if !beat_timer.timeout.is_connected(_process_beat):
+		beat_timer.timeout.connect(_process_beat)
 	beat_timer.start()
 
 func stop_metronome():
 	is_playing = false
 	if beat_timer:
 		beat_timer.stop()
-		beat_timer.timeout.disconnect(_process_beat)
+		if beat_timer.timeout.is_connected(_process_beat):
+			beat_timer.timeout.disconnect(_process_beat)
 
 func _process_beat():
 	if !is_playing: return

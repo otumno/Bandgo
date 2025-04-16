@@ -1,0 +1,3 @@
+[gd_scene format=3 uid="uid://g7lyjnlybd83"]
+
+[node name="Camera2Dautoload" type="Camera2D"]

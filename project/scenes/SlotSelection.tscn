@@ -14,12 +14,17 @@
 [node name="SlotSelection" type="Control"]
 layout_mode = 3
 anchors_preset = 0
+offset_right = 1920.0
+offset_bottom = 1200.0
 script = ExtResource("1_776cj")
 
 [node name="TextureRect" type="TextureRect" parent="."]
-layout_mode = 0
-offset_right = 1920.0
-offset_bottom = 1281.0
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 texture = ExtResource("1_87qkm")
 script = ExtResource("2_348qi")
 bpm = 100
@@ -28,7 +33,14 @@ max_scale = 1.01
 metadata/_edit_lock_ = true
 
 [node name="SlotManager" type="Control" parent="."]
-anchors_preset = 0
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("2_c52xp")
 transition_sound = ExtResource("5_att4u")
 fade_duration = 1.0
@@ -36,11 +48,18 @@ fade_color = Color(1, 1, 1, 1)
 
 [node name="SlotUI" type="VBoxContainer" parent="SlotManager"]
 unique_name_in_owner = true
-layout_mode = 0
-offset_left = 414.0
-offset_top = 544.0
-offset_right = 1498.0
-offset_bottom = 1202.0
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -542.0
+offset_top = -344.0
+offset_right = 542.0
+offset_bottom = 344.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("4_vuudk")
 
 [node name="Panel" type="Panel" parent="SlotManager/SlotUI"]

@@ -28,7 +28,7 @@ BpmManager="*res://project/scenes/BPMGenerator.tscn"
 [display]
 
 window/size/viewport_width=1920
-window/size/viewport_height=1280
+window/size/viewport_height=1200
 window/size/mode=3
 
 [rendering]
