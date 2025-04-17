@@ -7,3 +7,5 @@ extends Node
 @export var rhythm_window_after_ms: int = 50
 @export var upgrade_costs: Dictionary = {"speed": 100, "power": 200}
 @export var instrument_costs: Dictionary = {"guitar": 500, "drums": 800}
+@export var combo_multipliers: Array[int] = [1, 2, 3, 5, 10]
+@export var combo_pattern: Array[int] = [1, 1, 1, 1]  # можно задать шаблон

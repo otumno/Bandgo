@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3 uid="uid://crxvqga1dtvbn"]
+[gd_scene load_steps=29 format=3 uid="uid://crxvqga1dtvbn"]
 
 [ext_resource type="Script" uid="uid://chnxutp3hdm6t" path="res://project/scripts/SceneAudioHandler.gd" id="1_cqeua"]
 [ext_resource type="Texture2D" uid="uid://cbweq7e7c7pcd" path="res://project/assets/textures/6f018d8a158211f0a4402e814483879f_1.jpg" id="1_kgxh5"]
@@ -9,19 +9,29 @@
 [ext_resource type="Script" uid="uid://c75nob438sph0" path="res://project/scripts/BPM_Manager.gd" id="7_f3117"]
 [ext_resource type="AudioStream" uid="uid://ewwcwvre4fig" path="res://project/assets/sounds/Tac.mp3" id="8_a6cnm"]
 [ext_resource type="AudioStream" uid="uid://hd3rxq44mh6f" path="res://project/assets/sounds/Tic.mp3" id="9_xewpq"]
-[ext_resource type="Texture2D" uid="uid://degv8ksy8ppva" path="res://project/assets/textures/—Pngtree—iron drum_4431249.png" id="10_a6cnm"]
 [ext_resource type="Script" uid="uid://cyi4htwqahhjt" path="res://project/scripts/Instrument.gd" id="10_mvo24"]
+[ext_resource type="Texture2D" uid="uid://cx4cbbkkni0bj" path="res://project/assets/textures/Shadow.png" id="13_n55ws"]
+[ext_resource type="AudioStream" uid="uid://1sgsdhge4w7g" path="res://project/assets/sounds/xylophon_1.ogg" id="14_lpm4y"]
 [ext_resource type="AudioStream" uid="uid://b8obbfx45w55r" path="res://project/assets/sounds/Barrel_Tom.ogg" id="14_nooqs"]
 [ext_resource type="Script" uid="uid://df1wy3kgm5iwy" path="res://project/scripts/PlayerUI.gd" id="14_qo2pe"]
 [ext_resource type="AudioStream" uid="uid://cexwuu2jf8lbn" path="res://project/assets/sounds/Barrel_Fail.ogg" id="15_ftep8"]
 [ext_resource type="Script" uid="uid://cckliyyl5npbh" path="res://project/scripts/BPM_SpritePulser.gd" id="15_nooqs"]
+[ext_resource type="AudioStream" uid="uid://dgpfnx58hv8hk" path="res://project/assets/sounds/xylophon_2.ogg" id="15_qlf8t"]
 [ext_resource type="Texture2D" uid="uid://bwobsrgdgjyrg" path="res://project/assets/textures/FRAME_1.png" id="16_ftep8"]
+[ext_resource type="AudioStream" uid="uid://dlk4cmhqva4db" path="res://project/assets/sounds/xylophon_3.ogg" id="16_n55ws"]
 [ext_resource type="Texture2D" uid="uid://dv6pg3jv73gwi" path="res://project/assets/textures/FRAME_2.png" id="17_27fkg"]
-[ext_resource type="AudioStream" uid="uid://cr5hogfgnr608" path="res://project/assets/sounds/622224__nlux__nlux-hippy-tom-tom-19-gb1.wav" id="17_ftep8"]
+[ext_resource type="AudioStream" uid="uid://clnxb7pknphow" path="res://project/assets/sounds/xylophon_4.ogg" id="17_rbt3f"]
+[ext_resource type="AudioStream" uid="uid://dxmcutit8pbbu" path="res://project/assets/sounds/xylophon_Fail.ogg" id="18_4mt45"]
 [ext_resource type="Script" uid="uid://bl4b0m6owwkag" path="res://project/scripts/PatternAnalyzer.gd" id="19_27fkg"]
+[ext_resource type="Texture2D" uid="uid://b77702pbc12b3" path="res://project/assets/textures/Xylophone.png" id="19_qlf8t"]
+[ext_resource type="PackedScene" uid="uid://cxu2mdfufhifo" path="res://project/scenes/ScorePopup.tscn" id="19_rbt3f"]
+[ext_resource type="Texture2D" uid="uid://b7nlbr70vc8v2" path="res://project/assets/textures/Tom1.png" id="24_n55ws"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_f3117"]
-size = Vector2(149, 241)
+size = Vector2(519.804, 113)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_n55ws"]
+radius = 110.0
 
 [node name="Game" type="Node"]
 script = ExtResource("1_cqeua")
@@ -78,41 +88,46 @@ metronome_sounds = Array[AudioStream]([ExtResource("8_a6cnm"), ExtResource("9_xe
 
 [node name="Instrument_Barrel" type="Area2D" parent="."]
 script = ExtResource("10_mvo24")
-correct_sound_pattern = Array[AudioStream]([ExtResource("14_nooqs"), ExtResource("14_nooqs")])
-fail_sound = ExtResource("15_ftep8")
-first_click_sound = ExtResource("14_nooqs")
-rhythm_window_ms = 70.0
+correct_sound_pattern = Array[AudioStream]([ExtResource("14_lpm4y"), ExtResource("15_qlf8t"), ExtResource("16_n55ws"), ExtResource("17_rbt3f")])
+fail_sound = ExtResource("18_4mt45")
+first_click_sound = ExtResource("16_n55ws")
+score_popup_scene = ExtResource("19_rbt3f")
 
 [node name="Sprite2D" type="Sprite2D" parent="Instrument_Barrel"]
-position = Vector2(950, 975)
-scale = Vector2(0.191, 0.191)
-texture = ExtResource("10_a6cnm")
+position = Vector2(754, 934)
+scale = Vector2(0.715612, 0.715612)
+texture = ExtResource("19_qlf8t")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Instrument_Barrel"]
-position = Vector2(949.5, 985.5)
+position = Vector2(751.931, 870.059)
+rotation = -0.10472
 shape = SubResource("RectangleShape2D_f3117")
 
 [node name="PatternAnalyzer" type="Node" parent="Instrument_Barrel"]
 script = ExtResource("19_27fkg")
 
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Instrument_Barrel"]
+
 [node name="Instrument_Barrel2" type="Area2D" parent="."]
 script = ExtResource("10_mvo24")
-correct_sound_pattern = Array[AudioStream]([ExtResource("17_ftep8"), ExtResource("17_ftep8")])
+correct_sound_pattern = Array[AudioStream]([ExtResource("14_nooqs")])
 fail_sound = ExtResource("15_ftep8")
-first_click_sound = ExtResource("17_ftep8")
-rhythm_window_ms = 70.0
+first_click_sound = ExtResource("14_nooqs")
+score_popup_scene = ExtResource("19_rbt3f")
 
 [node name="Sprite2D" type="Sprite2D" parent="Instrument_Barrel2"]
-position = Vector2(1185, 903)
-scale = Vector2(0.191, 0.191)
-texture = ExtResource("10_a6cnm")
+position = Vector2(1173, 935)
+scale = Vector2(0.395421, 0.395421)
+texture = ExtResource("24_n55ws")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Instrument_Barrel2"]
-position = Vector2(1185, 916)
-shape = SubResource("RectangleShape2D_f3117")
+position = Vector2(1178, 904)
+shape = SubResource("CircleShape2D_n55ws")
 
 [node name="PatternAnalyzer" type="Node" parent="Instrument_Barrel2"]
 script = ExtResource("19_27fkg")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Instrument_Barrel2"]
 
 [node name="Control" type="Control" parent="." node_paths=PackedStringArray("player_name_label", "score_label")]
 layout_mode = 3
@@ -141,3 +156,13 @@ offset_bottom = 131.0
 theme = ExtResource("4_cqeua")
 horizontal_alignment = 2
 vertical_alignment = 1
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(760, 1051)
+scale = Vector2(0.352319, 0.352319)
+texture = ExtResource("13_n55ws")
+
+[node name="Sprite2D" type="Sprite2D" parent="Sprite2D"]
+position = Vector2(1197.78, -2.83827)
+scale = Vector2(0.640826, 0.640826)
+texture = ExtResource("13_n55ws")
