@@ -13,6 +13,8 @@ class_name Instrument
 @export var rhythm_window_ms: float = 100.0
 @export var combo_window_seconds: float = 2.0
 @export var combo_multipliers: Array[int] = [1, 2, 3, 5, 8]
+@export var allow_multiple_hits_per_beat: bool = false
+@export var miss_limit_before_combo_reset: int = 3
 
 @export_category("Visual Feedback")
 @export var score_popup_scene: PackedScene
@@ -33,12 +35,15 @@ class_name Instrument
 var bpm_manager: BPM_Manager
 var last_hit_time := 0.0
 var is_first_click := true
-var pattern_index := 0
 var feedback_tween: Tween
 var base_scale: Vector2
 var combo_count := 0
 var last_combo_time := 0.0
 var current_combo_multiplier := 1
+var _current_pattern_index := 0
+var _last_processed_beat := -1
+var _consecutive_misses := 0
+var _beat_hit_status := {}
 
 func _ready():
 	_initialize_nodes()
@@ -61,46 +66,57 @@ func _initialize_nodes():
 func _connect_signals():
 	bpm_manager = get_node_or_null("/root/BPM_GlobalManager")
 	if bpm_manager:
-		print("BPM Manager linked in Instrument")
+		bpm_manager.beat_triggered.connect(_on_beat)
 	else:
 		push_error("BPM Manager not found in autoload!")
-	
-	if pattern_analyzer:
-		pattern_analyzer.pattern_verified.connect(_on_pattern_verified)
-	else:
-		print("PatternAnalyzer not found - continuing without pattern analysis")
 
 func _on_input_event(_viewport, event: InputEvent, _shape_idx):
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		_handle_click()
+
+func _on_beat(beat_number: int):
+	# Обработка пропущенных битов
+	if _last_processed_beat != -1 and beat_number > _last_processed_beat + 1:
+		var missed_beats = beat_number - _last_processed_beat - 1
+		_consecutive_misses += missed_beats
+		_current_pattern_index = (_current_pattern_index + missed_beats) % correct_sound_pattern.size()
+		
+		if _consecutive_misses >= miss_limit_before_combo_reset:
+			_reset_combo()
 
 func _handle_click():
 	var current_time = Time.get_ticks_msec()
 	var current_beat = bpm_manager.current_beat if bpm_manager else 0
 	
 	if is_first_click:
-		if bpm_manager:
-			bpm_manager.start_metronome()
-		is_first_click = false
-		if first_click_sound:
-			_play_sound(first_click_sound)
-	
-	if pattern_analyzer:
-		pattern_analyzer.register_input(current_beat)
-	
+		_handle_first_click()
+		return
+
+	if !allow_multiple_hits_per_beat && _beat_hit_status.get(current_beat, false):
+		_handle_fail_hit(true)
+		return
+
 	var is_in_rhythm = _check_rhythm(current_time)
-	_update_combo(current_time, is_in_rhythm)
-	
-	if is_in_rhythm:
-		_play_correct_sound()
-		_add_points(int(points_per_click * in_rhythm_multiplier * current_combo_multiplier))
-	else:
-		_play_fail_sound()
-		_add_points(points_per_click)
-	
+	_current_pattern_index = (_current_pattern_index + 1) % correct_sound_pattern.size()
+	_last_processed_beat = current_beat
+	_beat_hit_status[current_beat] = true
 	last_hit_time = current_time
+
+	if is_in_rhythm:
+		_handle_correct_hit()
+	else:
+		_handle_fail_hit(false)
+
+	_update_combo(current_time, is_in_rhythm)
 	_play_visual_feedback()
 	_emit_particles(is_in_rhythm)
+
+func _handle_first_click():
+	if bpm_manager:
+		bpm_manager.start_metronome()
+	is_first_click = false
+	if first_click_sound:
+		_play_sound(first_click_sound)
 
 func _check_rhythm(current_time: float) -> bool:
 	if not bpm_manager:
@@ -112,6 +128,31 @@ func _check_rhythm(current_time: float) -> bool:
 	
 	return (time_in_beat <= rhythm_window_ms or 
 		   (beat_time - time_in_beat) <= rhythm_window_ms)
+
+func _handle_correct_hit():
+	_consecutive_misses = 0
+	_play_correct_sound()
+	_add_points(int(points_per_click * in_rhythm_multiplier * current_combo_multiplier))
+
+func _handle_fail_hit(is_double_hit: bool):
+	combo_count = 0
+	current_combo_multiplier = 1
+	_play_fail_sound()
+	_add_points(points_per_click if !is_double_hit else 0)
+	
+	if is_double_hit:
+		_show_combo_reset("Double hit!")
+
+func _reset_combo():
+	combo_count = 0
+	current_combo_multiplier = 1
+	_show_combo_reset("Miss limit reached!")
+
+func _show_combo_reset(message: String):
+	var popup_position = sprite.global_position if sprite else global_position
+	var popup = score_popup_scene.instantiate()
+	get_tree().root.add_child(popup)
+	popup.show_score(message, popup_position, Color.RED, 1)
 
 func _update_combo(current_time: float, is_in_rhythm: bool):
 	var time_since_last_combo = (current_time - last_combo_time) / 1000.0
@@ -133,9 +174,8 @@ func _play_correct_sound():
 		var sound_idx = min(combo_count - 3, combo_sounds.size() - 1)
 		_play_sound(combo_sounds[sound_idx])
 	else:
-		audio_player.stream = correct_sound_pattern[pattern_index % correct_sound_pattern.size()]
+		audio_player.stream = correct_sound_pattern[_current_pattern_index]
 		audio_player.play()
-		pattern_index += 1
 
 func _play_fail_sound():
 	if fail_sound:
@@ -193,16 +233,3 @@ func _emit_particles(is_in_rhythm: bool):
 		if combo_colors.size() > 0:
 			var color_idx = min(combo_count - 3, combo_colors.size() - 1)
 			combo_particles.modulate = combo_colors[color_idx]
-
-func _on_pattern_verified(pattern: Array[bool]):
-	await _start_automation(pattern)
-	pattern_analyzer.reset()
-
-func _start_automation(pattern: Array[bool]) -> void:
-	print("Playing back pattern:", pattern)
-	for i in range(pattern_analyzer.auto_repeat_count):
-		for hit in pattern:
-			await get_tree().create_timer(60.0 / bpm_manager.bpm).timeout
-			if hit and not correct_sound_pattern.is_empty():
-				var sound_index = randi() % correct_sound_pattern.size()
-				_play_sound(correct_sound_pattern[sound_index])

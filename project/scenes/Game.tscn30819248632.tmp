@@ -1,0 +1,278 @@
+[gd_scene load_steps=29 format=3 uid="uid://crxvqga1dtvbn"]
+
+[ext_resource type="Script" uid="uid://chnxutp3hdm6t" path="res://project/scripts/SceneAudioHandler.gd" id="1_cqeua"]
+[ext_resource type="Texture2D" uid="uid://cbweq7e7c7pcd" path="res://project/assets/textures/6f018d8a158211f0a4402e814483879f_1.jpg" id="1_kgxh5"]
+[ext_resource type="AudioStream" uid="uid://cgbv1cipijf0y" path="res://project/assets/sounds/703137__deadrobotmusic__ambient-piano-guitar-texture-e.ogg" id="2_f3117"]
+[ext_resource type="Theme" uid="uid://3pqwyww8rrpc" path="res://project/themes/new_theme.tres" id="4_cqeua"]
+[ext_resource type="Script" uid="uid://ic6623dcahtt" path="res://project/scripts/GameBackButton.gd" id="4_m7itv"]
+[ext_resource type="AudioStream" uid="uid://b3frfc43b7rdu" path="res://project/assets/sounds/zapsplat_musical_guitar_acoustic_nylon_grab_neck_strings_002_56231.mp3" id="6_m7itv"]
+[ext_resource type="AudioStream" uid="uid://ewwcwvre4fig" path="res://project/assets/sounds/Tac.mp3" id="8_a6cnm"]
+[ext_resource type="AudioStream" uid="uid://hd3rxq44mh6f" path="res://project/assets/sounds/Tic.mp3" id="9_xewpq"]
+[ext_resource type="Script" uid="uid://cyi4htwqahhjt" path="res://project/scripts/Instrument.gd" id="10_mvo24"]
+[ext_resource type="Texture2D" uid="uid://cx4cbbkkni0bj" path="res://project/assets/textures/Shadow.png" id="13_n55ws"]
+[ext_resource type="AudioStream" uid="uid://1sgsdhge4w7g" path="res://project/assets/sounds/xylophon_1.ogg" id="14_lpm4y"]
+[ext_resource type="AudioStream" uid="uid://b8obbfx45w55r" path="res://project/assets/sounds/Barrel_Tom.ogg" id="14_nooqs"]
+[ext_resource type="Script" uid="uid://df1wy3kgm5iwy" path="res://project/scripts/PlayerUI.gd" id="14_qo2pe"]
+[ext_resource type="AudioStream" uid="uid://cexwuu2jf8lbn" path="res://project/assets/sounds/Barrel_Fail.ogg" id="15_ftep8"]
+[ext_resource type="Script" uid="uid://cckliyyl5npbh" path="res://project/scripts/BPM_SpritePulser.gd" id="15_nooqs"]
+[ext_resource type="AudioStream" uid="uid://dgpfnx58hv8hk" path="res://project/assets/sounds/xylophon_2.ogg" id="15_qlf8t"]
+[ext_resource type="Texture2D" uid="uid://bwobsrgdgjyrg" path="res://project/assets/textures/FRAME_1.png" id="16_ftep8"]
+[ext_resource type="AudioStream" uid="uid://dlk4cmhqva4db" path="res://project/assets/sounds/xylophon_3.ogg" id="16_n55ws"]
+[ext_resource type="Texture2D" uid="uid://dv6pg3jv73gwi" path="res://project/assets/textures/FRAME_2.png" id="17_27fkg"]
+[ext_resource type="AudioStream" uid="uid://clnxb7pknphow" path="res://project/assets/sounds/xylophon_4.ogg" id="17_rbt3f"]
+[ext_resource type="AudioStream" uid="uid://dxmcutit8pbbu" path="res://project/assets/sounds/xylophon_Fail.ogg" id="18_4mt45"]
+[ext_resource type="Script" uid="uid://bl4b0m6owwkag" path="res://project/scripts/PatternAnalyzer.gd" id="19_27fkg"]
+[ext_resource type="Texture2D" uid="uid://b77702pbc12b3" path="res://project/assets/textures/Xylophone.png" id="19_qlf8t"]
+[ext_resource type="PackedScene" uid="uid://cxu2mdfufhifo" path="res://project/scenes/ScorePopup.tscn" id="19_rbt3f"]
+[ext_resource type="Texture2D" uid="uid://b7nlbr70vc8v2" path="res://project/assets/textures/Tom1.png" id="24_n55ws"]
+
+[sub_resource type="GDScript" id="GDScript_n55ws"]
+script/source = "extends Node
+class_name BPM_Manager
+
+# Сигналы
+signal beat_triggered(beat_number: int)
+signal pattern_detected(pattern: Array)
+
+@export var bpm: int = 120:
+	set(value):
+		bpm = clamp(value, 40, 300)
+		_update_beat_timer()
+
+@export var metronome_pattern: Array[int] = [1, 2, 3, 0]
+@export var metronome_sounds: Array[AudioStream]
+
+@export var analysis_window: int = 4  # Количество тактов для анализа
+
+var is_playing := false
+var current_beat := 0
+var players: Array[AudioStreamPlayer] = []
+var beat_timer: Timer
+var beat_history: Array[int] = []  # История тактов для анализа
+
+func _ready():
+	# Предварительная загрузка звуков
+	for sound in metronome_sounds:
+		var player = AudioStreamPlayer.new()
+		player.stream = sound
+		player.bus = \"SFX\"
+		add_child(player)
+		players.append(player)
+	
+	# Точный таймер
+	beat_timer = Timer.new()
+	beat_timer.process_callback = Timer.TIMER_PROCESS_PHYSICS
+	add_child(beat_timer)
+	_update_beat_timer()
+
+func _update_beat_timer():
+	if beat_timer:
+		beat_timer.wait_time = 60.0 / bpm
+
+func start_metronome():
+	if is_playing: return
+	
+	is_playing = true
+	current_beat = 0
+	_process_beat()
+	if !beat_timer.timeout.is_connected(_process_beat):
+		beat_timer.timeout.connect(_process_beat)
+	beat_timer.start()
+
+func stop_metronome():
+	is_playing = false
+	if beat_timer:
+		beat_timer.stop()
+		if beat_timer.timeout.is_connected(_process_beat):
+			beat_timer.timeout.disconnect(_process_beat)
+
+func _process_beat():
+	if !is_playing: return
+	
+	# Сохраняем текущий такт в историю
+	beat_history.append(current_beat)
+	while beat_history.size() > analysis_window * 2:  # Ограничиваем размер истории
+		beat_history.remove_at(0)
+	
+	# Воспроизводим звук для текущего такта
+	var sound_idx = metronome_pattern[current_beat % metronome_pattern.size()]
+	if sound_idx > 0 and sound_idx <= players.size():
+		players[sound_idx - 1].play()
+	
+	# Уведомляем о новом такте
+	emit_signal(\"beat_triggered\", current_beat)
+	
+	# Проверяем паттерн и эмитируем сигнал, если он найден
+	_check_for_pattern()
+	
+	current_beat += 1
+
+func _check_for_pattern():
+	if beat_history.size() < analysis_window * 2:
+		return
+	
+	var last_window = beat_history.slice(-analysis_window)
+	var prev_window = beat_history.slice(-analysis_window * 2, -analysis_window)
+	
+	if last_window == prev_window:
+		emit_signal(\"pattern_detected\", last_window)
+		print(\"Emitting signal 'pattern_detected' from BPM_Manager:\", last_window)
+
+# Проверка паттерна
+func check_pattern(pattern: Array) -> bool:
+	if pattern.size() != analysis_window:
+		return false
+	
+	var total_beats = beat_history.size()
+	if total_beats < analysis_window * 2:
+		return false
+	
+	# Проверяем, совпадает ли последний интервал с заданным паттерном
+	for i in range(analysis_window):
+		if beat_history[total_beats - analysis_window + i] != pattern[i]:
+			return false
+	return true
+"
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_f3117"]
+size = Vector2(519.804, 113)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_n55ws"]
+radius = 110.0
+
+[node name="Game" type="Node"]
+script = ExtResource("1_cqeua")
+use_local_music = true
+local_music = ExtResource("2_f3117")
+music_volume = 0.5
+
+[node name="TextureRect" type="TextureRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_kgxh5")
+
+[node name="SpritePulser" type="Control" parent="." node_paths=PackedStringArray("target_sprite")]
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("15_nooqs")
+target_sprite = NodePath("Sprite2D")
+frame_1_texture = ExtResource("16_ftep8")
+frame_2_texture = ExtResource("17_27fkg")
+pulse_scale = Vector2(1.01, 1.01)
+pulse_duration = 0.1
+beat_pattern = null
+pulse_pattern = null
+frame_2_display_time = null
+
+[node name="Sprite2D" type="Sprite2D" parent="SpritePulser"]
+
+[node name="BackButton" type="Button" parent="."]
+offset_left = 85.0
+offset_top = 154.0
+offset_right = 291.0
+offset_bottom = 236.0
+theme = ExtResource("4_cqeua")
+action_mode = 0
+text = "BACK"
+script = ExtResource("4_m7itv")
+target_scene = "uid://drwceegmg3f64"
+transition_sound = ExtResource("6_m7itv")
+fade_duration = 0.3
+fade_color = Color(1, 1, 1, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="Node" type="Node" parent="."]
+script = SubResource("GDScript_n55ws")
+bpm = 100
+metronome_pattern = Array[int]([1, 2, 2, 2])
+metronome_sounds = Array[AudioStream]([ExtResource("8_a6cnm"), ExtResource("9_xewpq")])
+
+[node name="Instrument_Barrel" type="Area2D" parent="."]
+script = ExtResource("10_mvo24")
+correct_sound_pattern = Array[AudioStream]([ExtResource("14_lpm4y"), ExtResource("15_qlf8t"), ExtResource("16_n55ws"), ExtResource("17_rbt3f")])
+fail_sound = ExtResource("18_4mt45")
+first_click_sound = ExtResource("16_n55ws")
+score_popup_scene = ExtResource("19_rbt3f")
+
+[node name="Sprite2D" type="Sprite2D" parent="Instrument_Barrel"]
+position = Vector2(754, 934)
+scale = Vector2(0.715612, 0.715612)
+texture = ExtResource("19_qlf8t")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Instrument_Barrel"]
+position = Vector2(751.931, 870.059)
+rotation = -0.10472
+shape = SubResource("RectangleShape2D_f3117")
+
+[node name="PatternAnalyzer" type="Node" parent="Instrument_Barrel"]
+script = ExtResource("19_27fkg")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Instrument_Barrel"]
+
+[node name="Instrument_Barrel2" type="Area2D" parent="."]
+script = ExtResource("10_mvo24")
+correct_sound_pattern = Array[AudioStream]([ExtResource("14_nooqs")])
+fail_sound = ExtResource("15_ftep8")
+first_click_sound = ExtResource("14_nooqs")
+score_popup_scene = ExtResource("19_rbt3f")
+
+[node name="Sprite2D" type="Sprite2D" parent="Instrument_Barrel2"]
+position = Vector2(1173, 935)
+scale = Vector2(0.395421, 0.395421)
+texture = ExtResource("24_n55ws")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Instrument_Barrel2"]
+position = Vector2(1178, 904)
+shape = SubResource("CircleShape2D_n55ws")
+
+[node name="PatternAnalyzer" type="Node" parent="Instrument_Barrel2"]
+script = ExtResource("19_27fkg")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Instrument_Barrel2"]
+
+[node name="Control" type="Control" parent="." node_paths=PackedStringArray("player_name_label", "score_label")]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("14_qo2pe")
+player_name_label = NodePath("PlayerNameLabel")
+score_label = NodePath("ScoreLabel")
+
+[node name="PlayerNameLabel" type="Label" parent="Control"]
+layout_mode = 0
+offset_left = 94.0
+offset_top = 60.0
+offset_right = 469.0
+offset_bottom = 134.0
+theme = ExtResource("4_cqeua")
+vertical_alignment = 1
+
+[node name="ScoreLabel" type="Label" parent="Control"]
+layout_mode = 0
+offset_left = 1452.0
+offset_top = 57.0
+offset_right = 1827.0
+offset_bottom = 131.0
+theme = ExtResource("4_cqeua")
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(760, 1051)
+scale = Vector2(0.352319, 0.352319)
+texture = ExtResource("13_n55ws")
+
+[node name="Sprite2D" type="Sprite2D" parent="Sprite2D"]
+position = Vector2(1197.78, -2.83827)
+scale = Vector2(0.640826, 0.640826)
+texture = ExtResource("13_n55ws")

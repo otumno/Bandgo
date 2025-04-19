@@ -1,7 +1,6 @@
 extends Node
 class_name BPM_Manager
 
-# Сигналы
 signal beat_triggered(beat_number: int)
 signal pattern_detected(pattern: Array)
 
@@ -12,25 +11,31 @@ signal pattern_detected(pattern: Array)
 
 @export var metronome_pattern: Array[int] = [1, 2, 3, 0]
 @export var metronome_sounds: Array[AudioStream]
-
-@export var analysis_window: int = 4  # Количество тактов для анализа
+@export var analysis_window: int = 4
 
 var is_playing := false
 var current_beat := 0
 var players: Array[AudioStreamPlayer] = []
 var beat_timer: Timer
-var beat_history: Array[int] = []  # История тактов для анализа
+var beat_history: Array[int] = []:
+	get:
+		return beat_history
+	set(value):
+		beat_history = value
 
 func _ready():
-	# Предварительная загрузка звуков
+	_initialize_players()
+	_setup_timer()
+
+func _initialize_players():
 	for sound in metronome_sounds:
 		var player = AudioStreamPlayer.new()
 		player.stream = sound
 		player.bus = "SFX"
 		add_child(player)
 		players.append(player)
-	
-	# Точный таймер
+
+func _setup_timer():
 	beat_timer = Timer.new()
 	beat_timer.process_callback = Timer.TIMER_PROCESS_PHYSICS
 	add_child(beat_timer)
@@ -60,22 +65,16 @@ func stop_metronome():
 func _process_beat():
 	if !is_playing: return
 	
-	# Сохраняем текущий такт в историю
 	beat_history.append(current_beat)
-	while beat_history.size() > analysis_window * 2:  # Ограничиваем размер истории
+	while beat_history.size() > analysis_window * 2:
 		beat_history.remove_at(0)
 	
-	# Воспроизводим звук для текущего такта
 	var sound_idx = metronome_pattern[current_beat % metronome_pattern.size()]
 	if sound_idx > 0 and sound_idx <= players.size():
 		players[sound_idx - 1].play()
 	
-	# Уведомляем о новом такте
 	emit_signal("beat_triggered", current_beat)
-	
-	# Проверяем паттерн и эмитируем сигнал, если он найден
 	_check_for_pattern()
-	
 	current_beat += 1
 
 func _check_for_pattern():
@@ -87,19 +86,3 @@ func _check_for_pattern():
 	
 	if last_window == prev_window:
 		emit_signal("pattern_detected", last_window)
-		print("Emitting signal 'pattern_detected' from BPM_Manager:", last_window)
-
-# Проверка паттерна
-func check_pattern(pattern: Array) -> bool:
-	if pattern.size() != analysis_window:
-		return false
-	
-	var total_beats = beat_history.size()
-	if total_beats < analysis_window * 2:
-		return false
-	
-	# Проверяем, совпадает ли последний интервал с заданным паттерном
-	for i in range(analysis_window):
-		if beat_history[total_beats - analysis_window + i] != pattern[i]:
-			return false
-	return true

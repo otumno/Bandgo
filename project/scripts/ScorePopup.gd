@@ -6,8 +6,12 @@ extends Label
 @export var max_scale: float = 1.5
 @export var fade_out_delay: float = 0.2
 
-func show_score(value: int, popup_position: Vector2, color: Color, multiplier: int = 1):
-	text = "x%d %d" % [multiplier, value] if multiplier > 1 else str(value)
+func show_score(value: Variant, popup_position: Vector2, color: Color, multiplier: int = 1):
+	if value is String:
+		text = value
+	else:
+		text = "x%d %d" % [multiplier, value] if multiplier > 1 else str(value)
+	
 	self.modulate = color
 	self.global_position = popup_position
 	self.modulate.a = 1.0
