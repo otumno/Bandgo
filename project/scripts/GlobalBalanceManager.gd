@@ -10,3 +10,4 @@ extends Node
 @export var combo_multipliers: Array[int] = [1, 2, 3, 5, 10]
 @export var combo_pattern: Array[int] = [1, 1, 1, 1]
 @export var max_missed_beats_allowed: int = 3
+@export var combo_reset_message_delay_beats: int = 4

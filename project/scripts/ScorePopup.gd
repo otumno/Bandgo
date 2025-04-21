@@ -10,19 +10,15 @@ func show_score(value: Variant, popup_position: Vector2, color: Color, multiplie
 	if value is String:
 		text = value
 	else:
-		text = "x%d %d" % [multiplier, value] if multiplier > 1 else str(value)
-	
+		text = "x%d %d" % [max(multiplier, 1), value] if multiplier > 1 else str(value)
 	self.modulate = color
 	self.global_position = popup_position
 	self.modulate.a = 1.0
 	scale = Vector2.ONE
-	
 	var tween = create_tween()
-	
 	if scale_effect:
 		tween.tween_property(self, "scale", Vector2(max_scale, max_scale), duration * 0.2)
 		tween.tween_property(self, "scale", Vector2.ONE, duration * 0.3)
-	
 	tween.parallel().tween_property(self, "global_position", popup_position + Vector2(0, -rise_distance), duration)
 	tween.parallel().tween_property(self, "modulate:a", 0.0, duration).set_delay(fade_out_delay)
 	tween.tween_callback(queue_free)

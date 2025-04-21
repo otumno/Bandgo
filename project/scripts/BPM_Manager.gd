@@ -1,8 +1,7 @@
 extends Node
-class_name BPM_Manager
 
+class_name BPM_Manager
 signal beat_triggered(beat_number: int)
-signal pattern_detected(pattern: Array)
 
 @export var bpm: int = 120:
 	set(value):
@@ -11,19 +10,16 @@ signal pattern_detected(pattern: Array)
 
 @export var metronome_pattern: Array[int] = [1, 2, 3, 0]
 @export var metronome_sounds: Array[AudioStream]
-@export var analysis_window: int = 4
-
 var is_playing := false
 var current_beat := 0
 var players: Array[AudioStreamPlayer] = []
 var beat_timer: Timer
-var beat_history: Array[int] = []:
-	get:
-		return beat_history
-	set(value):
-		beat_history = value
 
 func _ready():
+	# Добавлена проверка на пустой паттерн
+	if metronome_pattern.is_empty():
+		metronome_pattern = [1] # Устанавливаем минимальный паттерн по умолчанию
+		push_warning("BPM_Manager: metronome_pattern is empty, using default [1]")
 	_initialize_players()
 	_setup_timer()
 
@@ -46,12 +42,12 @@ func _update_beat_timer():
 		beat_timer.wait_time = 60.0 / bpm
 
 func start_metronome():
-	if is_playing: return
-	
+	if is_playing:
+		return
 	is_playing = true
 	current_beat = 0
 	_process_beat()
-	if !beat_timer.timeout.is_connected(_process_beat):
+	if not beat_timer.timeout.is_connected(_process_beat):
 		beat_timer.timeout.connect(_process_beat)
 	beat_timer.start()
 
@@ -63,26 +59,12 @@ func stop_metronome():
 			beat_timer.timeout.disconnect(_process_beat)
 
 func _process_beat():
-	if !is_playing: return
-	
-	beat_history.append(current_beat)
-	while beat_history.size() > analysis_window * 2:
-		beat_history.remove_at(0)
-	
-	var sound_idx = metronome_pattern[current_beat % metronome_pattern.size()]
+	if not is_playing:
+		return
+	# Добавлена проверка на пустой паттерн перед использованием %
+	var pattern_size = max(1, metronome_pattern.size())
+	var sound_idx = metronome_pattern[current_beat % pattern_size]
 	if sound_idx > 0 and sound_idx <= players.size():
 		players[sound_idx - 1].play()
-	
 	emit_signal("beat_triggered", current_beat)
-	_check_for_pattern()
 	current_beat += 1
-
-func _check_for_pattern():
-	if beat_history.size() < analysis_window * 2:
-		return
-	
-	var last_window = beat_history.slice(-analysis_window)
-	var prev_window = beat_history.slice(-analysis_window * 2, -analysis_window)
-	
-	if last_window == prev_window:
-		emit_signal("pattern_detected", last_window)

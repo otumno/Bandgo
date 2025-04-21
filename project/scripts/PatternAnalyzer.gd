@@ -1,75 +1,66 @@
 extends Node
 class_name PatternAnalyzer
 
-signal pattern_verified(pattern: Array[bool])
+signal pattern_verified(recorded_pattern: Array[bool], instrument_map: Dictionary)
 
-@export var bpm_manager: BPM_Manager
-@export var analysis_window: int = 4
-@export var required_matches: int = 2
-@export var auto_repeat_count: int = 3
+@export var bpm_manager: Node
+@export var auto_repeat_count: int = 2
+@export var required_matches: int = 1
 
-enum State { IDLE, RECORDING, CHECKING, AUTOMATING }
-
-var state: State = State.IDLE
-var current_beat := 0
-var beat_inputs: Dictionary = {}  # beat_number -> bool
+var pattern_length: int = 0
 var input_buffer: Array[bool] = []
-var recorded_pattern: Array[bool] = []
-var match_count := 0
+var instrument_buffer: Array[String] = []
+
+var reference_pattern: Array[bool] = []
+var reference_instruments: Array[String] = []
+
+var match_count: int = 0
+var state := "IDLE"
+var beat_index := 0
 
 func _ready():
-	if not bpm_manager:
-		bpm_manager = BPM_GlobalManager
+	if bpm_manager == null:
+		bpm_manager = get_parent().find_child("BPM_Manager", true, false)
 	if bpm_manager:
 		bpm_manager.beat_triggered.connect(_on_beat)
-	else:
-		push_error("No BPM_Manager assigned or found!")
+		pattern_length = bpm_manager.metronome_pattern.size()
 
-func register_input(beat: int):
-	beat_inputs[beat] = true
+func register_input(instrument_name: String):
+	while instrument_buffer.size() <= beat_index:
+		instrument_buffer.append("")
+	instrument_buffer[beat_index] = instrument_name
+	while input_buffer.size() <= beat_index:
+		input_buffer.append(false)
+	input_buffer[beat_index] = true
 
-func _on_beat(beat_number: int):
-	current_beat = beat_number
-
-	var was_pressed: bool = beat_inputs.get(beat_number, false)
-	input_buffer.append(was_pressed)
-	while input_buffer.size() > analysis_window:
-		input_buffer.remove_at(0)
-
-	# Удаляем старые события, чтобы не накапливались
-	beat_inputs.erase(beat_number - analysis_window)
+func _on_beat(_beat: int):
+	beat_index += 1
+	var _current := false
+	if beat_index < input_buffer.size():
+		_current = input_buffer[beat_index]
 
 	match state:
-		State.IDLE:
-			if input_buffer.size() == analysis_window and _has_any_true(input_buffer):
-				recorded_pattern = input_buffer.duplicate()
-				match_count = 0
-				state = State.CHECKING
-				print("Recorded pattern:", recorded_pattern)
+		"IDLE":
+			if beat_index >= pattern_length:
+				var slice = input_buffer.slice(beat_index - pattern_length, beat_index)
+				if slice.any(func(x): return x):
+					reference_pattern = slice.duplicate()
+					reference_instruments = instrument_buffer.slice(beat_index - pattern_length, beat_index)
+					match_count = 0
+					state = "CHECKING"
 
-		State.CHECKING:
-			if input_buffer == recorded_pattern:
-				match_count += 1
-				print("Pattern matched. Match count:", match_count)
-			else:
-				match_count = 0
-				print("Pattern mismatch. Resetting count.")
+		"CHECKING":
+			if beat_index >= pattern_length:
+				var slice = input_buffer.slice(beat_index - pattern_length, beat_index)
+				if slice == reference_pattern:
+					match_count += 1
+					if match_count >= required_matches:
+						state = "AUTOMATING"
+						emit_signal("pattern_verified", reference_pattern, reference_instruments)
+				else:
+					match_count = 0
+					reference_pattern = slice.duplicate()
+					reference_instruments = instrument_buffer.slice(beat_index - pattern_length, beat_index)
 
-			if match_count >= required_matches:
-				state = State.AUTOMATING
-				emit_signal("pattern_verified", recorded_pattern)
-
-		State.AUTOMATING:
+		"AUTOMATING":
 			pass
-
-func _has_any_true(arr: Array[bool]) -> bool:
-	for value in arr:
-		if value:
-			return true
-	return false
-
-func reset():
-	input_buffer.clear()
-	recorded_pattern.clear()
-	match_count = 0
-	state = State.IDLE

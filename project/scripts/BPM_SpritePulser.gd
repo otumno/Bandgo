@@ -18,7 +18,7 @@ var _current_beat: int = 0
 
 func _ready():
 	# Инициализация BPM Manager
-	_bpm_manager = BPM_GlobalManager as BPM_Manager
+	_bpm_manager = get_tree().current_scene.get_node("BPM_Manager")
 	if not _bpm_manager:
 		push_error("BPM Manager not found!")
 		return
@@ -35,10 +35,14 @@ func _ready():
 	_bpm_manager.beat_triggered.connect(_on_beat)
 
 func _on_beat(beat_number: int):
+	if beat_pattern.size() == 0:
+		push_warning("BPM_SpritePulser: beat_pattern is empty, skipping beat processing.")
+		return
+
 	_current_beat = beat_number % beat_pattern.size()
 	
 	# Пульсация
-	if pulse_pattern[_current_beat] == 1:
+	if pulse_pattern.size() > 0 and pulse_pattern[_current_beat] == 1:
 		_pulse_sprite()
 	
 	# Смена кадра если нужно

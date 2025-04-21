@@ -23,7 +23,6 @@ GlobalBalanceManager="*res://project/scenes/GlobalBalanceManagerScene.tscn"
 GameManager="*res://project/scripts/GameManager.gd"
 SceneManager="*res://project/scripts/SceneManager.gd"
 SceneTransitionManagerScript="*res://project/scripts/SceneTransitionManagerScript.gd"
-BPM_GlobalManager="*res://project/scenes/BPMGenerator.tscn"
 
 [display]
 
