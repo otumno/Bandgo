@@ -61,8 +61,10 @@ script = ExtResource("15_nooqs")
 target_sprite = NodePath("Sprite2D")
 frame_1_texture = ExtResource("16_ftep8")
 frame_2_texture = ExtResource("17_27fkg")
-pulse_scale = Vector2(1.01, 1.01)
-pulse_duration = 0.1
+pulse_scale = Vector2(1.001, 1.001)
+pulse_duration = 0.05
+beat_pattern = Array[int]([1, 1, 1, 1])
+pulse_pattern = Array[int]([1, 1, 1, 1])
 
 [node name="Sprite2D" type="Sprite2D" parent="SpritePulser"]
 
@@ -89,6 +91,7 @@ script = ExtResource("10_mvo24")
 correct_sound_pattern = Array[AudioStream]([ExtResource("14_lpm4y"), ExtResource("15_qlf8t"), ExtResource("16_n55ws"), ExtResource("17_rbt3f")])
 fail_sound = ExtResource("18_4mt45")
 first_click_sound = ExtResource("16_n55ws")
+input_keys = Array[String](["a"])
 score_popup_scene = ExtResource("19_rbt3f")
 
 [node name="Sprite2D" type="Sprite2D" parent="Instrument_Xylo"]
@@ -111,6 +114,7 @@ script = ExtResource("10_mvo24")
 correct_sound_pattern = Array[AudioStream]([ExtResource("14_nooqs")])
 fail_sound = ExtResource("15_ftep8")
 first_click_sound = ExtResource("14_nooqs")
+input_keys = Array[String](["ui_down"])
 score_popup_scene = ExtResource("19_rbt3f")
 
 [node name="Sprite2D" type="Sprite2D" parent="Instrument_Tom"]

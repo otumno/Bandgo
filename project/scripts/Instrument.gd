@@ -16,6 +16,9 @@ class_name Instrument
 @export var allow_multiple_hits_per_beat: bool = false
 @export var miss_limit_before_combo_reset: int = 3
 
+@export_category("Input Settings")
+@export var input_keys: Array[String]  # Массив для хранения клавиш
+
 @export_category("Visual Feedback")
 @export var score_popup_scene: PackedScene
 @export var in_rhythm_color: Color = Color.GREEN
@@ -51,6 +54,11 @@ func _ready():
 	_connect_signals()
 	base_scale = sprite.scale if sprite else Vector2.ONE
 	input_event.connect(_on_input_event)
+
+func _process(delta: float) -> void:
+	for key in input_keys:
+		if Input.is_action_just_pressed(key):
+			_handle_click()
 
 func _initialize_nodes():
 	if not audio_player:
@@ -146,7 +154,7 @@ func _handle_fail_hit(is_double_hit: bool):
 	_add_points(points_per_click if !is_double_hit else 0)
 	if is_double_hit:
 		_show_combo_reset("Double hit!")
-	_reset_combo()
+		_reset_combo()
 
 func _reset_combo():
 	combo_count = 0
