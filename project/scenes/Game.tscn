@@ -1,4 +1,4 @@
-[gd_scene load_steps=30 format=3 uid="uid://crxvqga1dtvbn"]
+[gd_scene load_steps=28 format=3 uid="uid://crxvqga1dtvbn"]
 
 [ext_resource type="Script" uid="uid://chnxutp3hdm6t" path="res://project/scripts/SceneAudioHandler.gd" id="1_cqeua"]
 [ext_resource type="Texture2D" uid="uid://cbweq7e7c7pcd" path="res://project/assets/textures/6f018d8a158211f0a4402e814483879f_1.jpg" id="1_kgxh5"]
@@ -20,9 +20,7 @@
 [ext_resource type="Texture2D" uid="uid://dv6pg3jv73gwi" path="res://project/assets/textures/FRAME_2.png" id="17_27fkg"]
 [ext_resource type="AudioStream" uid="uid://b4yc4eov6sn8o" path="res://project/assets/sounds/Tac1.mp3" id="17_pwtkv"]
 [ext_resource type="AudioStream" uid="uid://clnxb7pknphow" path="res://project/assets/sounds/xylophon_4.ogg" id="17_rbt3f"]
-[ext_resource type="AudioStream" uid="uid://dxmcutit8pbbu" path="res://project/assets/sounds/xylophon_Fail.ogg" id="18_4mt45"]
 [ext_resource type="AudioStream" uid="uid://dn77en3rkyisk" path="res://project/assets/sounds/Tic1.mp3" id="18_mpdfd"]
-[ext_resource type="Script" uid="uid://bl4b0m6owwkag" path="res://project/scripts/PatternAnalyzer.gd" id="19_27fkg"]
 [ext_resource type="Texture2D" uid="uid://b77702pbc12b3" path="res://project/assets/textures/Xylophone.png" id="19_qlf8t"]
 [ext_resource type="PackedScene" uid="uid://cxu2mdfufhifo" path="res://project/scenes/ScorePopup.tscn" id="19_rbt3f"]
 [ext_resource type="Texture2D" uid="uid://b7nlbr70vc8v2" path="res://project/assets/textures/Tom1.png" id="24_n55ws"]
@@ -88,9 +86,10 @@ script = ExtResource("7_f3117")
 
 [node name="Instrument_Xylo" type="Area2D" parent="."]
 script = ExtResource("10_mvo24")
-correct_sound_pattern = Array[AudioStream]([ExtResource("14_lpm4y"), ExtResource("15_qlf8t"), ExtResource("16_n55ws"), ExtResource("17_rbt3f")])
-fail_sound = ExtResource("18_4mt45")
-first_click_sound = ExtResource("16_n55ws")
+sound_pattern = Array[AudioStream]([ExtResource("14_lpm4y"), ExtResource("15_qlf8t"), ExtResource("16_n55ws"), ExtResource("17_rbt3f")])
+first_click_sound = ExtResource("14_lpm4y")
+fail_sound = ExtResource("15_ftep8")
+combo_multipliers = Array[int]([1, 2, 2, 4, 4, 8, 8, 10, 12])
 input_keys = Array[String](["a"])
 score_popup_scene = ExtResource("19_rbt3f")
 
@@ -104,15 +103,11 @@ position = Vector2(751.931, 870.059)
 rotation = -0.10472
 shape = SubResource("RectangleShape2D_f3117")
 
-[node name="PatternAnalyzer" type="Node" parent="Instrument_Xylo"]
-script = ExtResource("19_27fkg")
-
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Instrument_Xylo"]
 
 [node name="Instrument_Tom" type="Area2D" parent="."]
 script = ExtResource("10_mvo24")
-correct_sound_pattern = Array[AudioStream]([ExtResource("14_nooqs")])
-fail_sound = ExtResource("15_ftep8")
+sound_pattern = Array[AudioStream]([ExtResource("14_nooqs")])
 first_click_sound = ExtResource("14_nooqs")
 input_keys = Array[String](["ui_down"])
 score_popup_scene = ExtResource("19_rbt3f")
@@ -125,9 +120,6 @@ texture = ExtResource("24_n55ws")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Instrument_Tom"]
 position = Vector2(1178, 904)
 shape = SubResource("CircleShape2D_n55ws")
-
-[node name="PatternAnalyzer" type="Node" parent="Instrument_Tom"]
-script = ExtResource("19_27fkg")
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Instrument_Tom"]
 
