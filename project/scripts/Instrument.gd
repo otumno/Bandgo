@@ -2,16 +2,13 @@ extends Area2D
 class_name Instrument
 
 @export_category("Sound Settings")
-@export var sound_pattern: Array[AudioStream]  # Переименовано с correct_sound_pattern
+@export var sound_pattern: Array[AudioStream]
 @export var first_click_sound: AudioStream
 @export var combo_sounds: Array[AudioStream]
-@export var fail_sound: AudioStream  # Добавлено объявление fail_sound
+@export var fail_sound: AudioStream
 
-@export_category("Gameplay Settings")
-@export var points_per_click: int = 10
-@export var combo_window_seconds: float = 2.0
-@export var combo_multipliers: Array[int] = [1, 2, 3, 5, 8]
-@export var allow_multiple_hits_per_beat: bool = false  # Опция для разрешения множественных нажатий в течении такта
+@export_category("Instrument Type")
+@export var instrument_type: String = "default"
 
 @export_category("Input Settings")
 @export var input_keys: Array[String]
@@ -25,6 +22,12 @@ class_name Instrument
 @export var max_scale_limit: float = 1.3
 @export var hit_particles: GPUParticles2D
 @export var combo_particles: GPUParticles2D
+
+# Balance settings (will be loaded from GlobalBalanceManager)
+var points_per_click: int
+var combo_window_seconds: float
+var combo_multipliers: Array = [1, 2, 3, 5, 8]  # Не указываем тип явно
+var allow_multiple_hits_per_beat: bool
 
 @onready var audio_player: AudioStreamPlayer = $AudioStreamPlayer
 @onready var sprite: Sprite2D = $Sprite2D
@@ -40,15 +43,20 @@ var current_pattern_index := 0
 var _beat_hit_status := {}
 
 func _ready():
+	_load_balance_settings()
 	_initialize_nodes()
 	_connect_signals()
 	base_scale = sprite.scale if sprite else Vector2.ONE
 	input_event.connect(_on_input_event)
 
-func _process(delta: float) -> void:
-	for key in input_keys:
-		if Input.is_action_just_pressed(key):
-			_handle_click()
+func _load_balance_settings():
+	var settings = GlobalBalanceManager.instrument_settings.get(instrument_type, {})
+	combo_multipliers = settings.get("combo_multipliers", [1, 2, 3, 5, 8]).duplicate()
+	
+	points_per_click = settings.get("points_per_click", 10)
+	combo_window_seconds = settings.get("combo_window_seconds", 2.0)
+	combo_multipliers = Array(settings.get("combo_multipliers", PackedInt32Array([1, 2, 3, 5, 8])))
+	allow_multiple_hits_per_beat = settings.get("allow_multiple_hits", false)
 
 func _initialize_nodes():
 	if not audio_player:
@@ -76,12 +84,10 @@ func _handle_click():
 	var current_time = Time.get_ticks_msec()
 	var current_beat = bpm_manager.current_beat if bpm_manager else 0
 
-	# Проверка на множественные нажатия
 	if not allow_multiple_hits_per_beat and _beat_hit_status.get(current_beat, false):
 		_handle_fail_hit(true)
 		return
 
-	# Первая активация инструмента, если метроном ещё не запущен
 	if bpm_manager and not bpm_manager.is_playing:
 		bpm_manager.start_metronome()
 		if first_click_sound:
@@ -90,22 +96,17 @@ func _handle_click():
 		_emit_particles(true)
 		return
 
-	# Воспроизведение звука по паттерну
 	if sound_pattern.size() > 0:
 		_play_sound(sound_pattern[current_pattern_index])
 		current_pattern_index = (current_pattern_index + 1) % sound_pattern.size()
 
-	# Обработка комбо
 	_update_combo(current_time)
 	_play_visual_feedback()
 	_emit_particles(true)
-
-	# Начисление очков
 	_add_points(points_per_click * current_combo_multiplier)
 	_beat_hit_status[current_beat] = true
 
 func _on_beat(beat_number: int):
-	# Обновление текущего индекса паттерна при каждом такте
 	if sound_pattern.size() > 0:
 		current_pattern_index = beat_number % sound_pattern.size()
 	_beat_hit_status[beat_number] = false
