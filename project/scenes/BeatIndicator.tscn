@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://bud4ob6al1e2p"]
+
+[ext_resource type="Script" uid="uid://d26bnnn8kcu5b" path="res://project/scripts/Beatindicator.gd" id="1_3b5mi"]
+
+[node name="BeatIndicator" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_3b5mi")

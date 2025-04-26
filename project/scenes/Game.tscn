@@ -1,8 +1,9 @@
-[gd_scene load_steps=28 format=3 uid="uid://crxvqga1dtvbn"]
+[gd_scene load_steps=29 format=3 uid="uid://crxvqga1dtvbn"]
 
 [ext_resource type="Script" uid="uid://chnxutp3hdm6t" path="res://project/scripts/SceneAudioHandler.gd" id="1_cqeua"]
 [ext_resource type="Texture2D" uid="uid://cbweq7e7c7pcd" path="res://project/assets/textures/6f018d8a158211f0a4402e814483879f_1.jpg" id="1_kgxh5"]
 [ext_resource type="AudioStream" uid="uid://cgbv1cipijf0y" path="res://project/assets/sounds/703137__deadrobotmusic__ambient-piano-guitar-texture-e.ogg" id="2_f3117"]
+[ext_resource type="PackedScene" uid="uid://bud4ob6al1e2p" path="res://project/scenes/BeatIndicator.tscn" id="3_rbt3f"]
 [ext_resource type="Theme" uid="uid://3pqwyww8rrpc" path="res://project/themes/new_theme.tres" id="4_cqeua"]
 [ext_resource type="Script" uid="uid://ic6623dcahtt" path="res://project/scripts/GameBackButton.gd" id="4_m7itv"]
 [ext_resource type="AudioStream" uid="uid://b3frfc43b7rdu" path="res://project/assets/sounds/zapsplat_musical_guitar_acoustic_nylon_grab_neck_strings_002_56231.mp3" id="6_m7itv"]
@@ -67,10 +68,10 @@ pulse_pattern = Array[int]([1, 1, 1, 1])
 [node name="Sprite2D" type="Sprite2D" parent="SpritePulser"]
 
 [node name="BackButton" type="Button" parent="."]
-offset_left = 85.0
-offset_top = 154.0
-offset_right = 291.0
-offset_bottom = 236.0
+offset_left = 82.0
+offset_top = 171.0
+offset_right = 288.0
+offset_bottom = 253.0
 theme = ExtResource("4_cqeua")
 action_mode = 0
 text = "BACK"
@@ -109,6 +110,8 @@ shape = SubResource("RectangleShape2D_f3117")
 script = ExtResource("10_mvo24")
 sound_pattern = Array[AudioStream]([ExtResource("14_nooqs")])
 first_click_sound = ExtResource("14_nooqs")
+fail_sound = ExtResource("15_ftep8")
+combo_multipliers = Array[int]([2, 2, 4, 4, 8, 8, 10, 12])
 input_keys = Array[String](["ui_down"])
 score_popup_scene = ExtResource("19_rbt3f")
 
@@ -125,31 +128,61 @@ shape = SubResource("CircleShape2D_n55ws")
 
 [node name="Control" type="Control" parent="." node_paths=PackedStringArray("player_name_label", "score_label")]
 layout_mode = 3
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("14_qo2pe")
 player_name_label = NodePath("PlayerNameLabel")
 score_label = NodePath("ScoreLabel")
 
 [node name="PlayerNameLabel" type="Label" parent="Control"]
 layout_mode = 0
-offset_left = 94.0
-offset_top = 60.0
-offset_right = 469.0
-offset_bottom = 134.0
+offset_left = -850.0
+offset_top = -500.0
+offset_right = -198.0
+offset_bottom = -426.0
 theme = ExtResource("4_cqeua")
 vertical_alignment = 1
 
 [node name="ScoreLabel" type="Label" parent="Control"]
 layout_mode = 0
-offset_left = 1452.0
-offset_top = 57.0
-offset_right = 1827.0
-offset_bottom = 131.0
+offset_left = 25.0
+offset_top = -500.0
+offset_right = 882.0
+offset_bottom = -426.0
 theme = ExtResource("4_cqeua")
 horizontal_alignment = 2
 vertical_alignment = 1
+
+[node name="BeatIndicator" parent="Control" instance=ExtResource("3_rbt3f")]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = -896.0
+offset_top = -310.0
+offset_right = 932.0
+offset_bottom = -230.0
+grow_vertical = 2
+bpm_manager = NodePath("../../BPM_Manager")
+rect_height = 20.0
+margin = 0.0
+beat_colors = Array[Color]([Color(0.701961, 0, 0, 0.666667), Color(1, 0.784314, 0.176471, 0.666667), Color(0.117647, 0.313726, 0.682353, 0.666667), Color(0.54902, 0.0745098, 0.447059, 0.666667)])
+indicator_color = Color(0.159752, 0.158467, 0.154971, 1)
+indicator_width = 2.0
+secondary_colors = Array[Color]([Color(0.701961, 0, 0, 0.0784314), Color(1, 0.784314, 0.501961, 0.0745098), Color(0.117647, 0.313726, 0.666667, 0.0784314), Color(0.54902, 0.0784314, 0.447059, 0.0784314)])
+fade_after_pass = false
+scale_up_amount = 10.0
+scale_down_amount = 3.0
+scale_effect_distance = 45.0
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 position = Vector2(760, 1051)
@@ -163,5 +196,6 @@ texture = ExtResource("13_n55ws")
 
 [node name="BPM_Manager" type="Node2D" parent="."]
 script = ExtResource("7_f3117")
-metronome_pattern = Array[int]([1, 2, 2, 2, 2, 2, 2, 2])
+bpm = 99
+metronome_pattern = Array[int]([1, 2, 2, 2])
 metronome_sounds = Array[AudioStream]([ExtResource("17_pwtkv"), ExtResource("18_mpdfd"), ExtResource("27_4mt45")])
