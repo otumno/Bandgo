@@ -5,21 +5,32 @@ extends Node
 	"default": {
 		"points_per_click": 10,
 		"combo_window_seconds": 2.0,
-		"combo_multipliers": [1, 2, 3, 5, 8],  # Обычный массив, редактор сам определит тип
+		"combo_multipliers": [1, 2, 3, 5, 8],
 		"allow_multiple_hits": false
 	},
 	"xylophone": {
 		"points_per_click": 15,
-		"combo_window_seconds": 1.5,
-		"combo_multipliers": PackedInt32Array([1, 2, 3, 5, 8, 10, 12])
-	},
-	"drum": {
-		"points_per_click": 8,
-		"allow_multiple_hits": true,
-		"combo_multipliers": PackedInt32Array([2, 2, 4, 4, 8, 8, 10, 12])
+		"combo_multipliers": [1, 2, 3, 5, 8, 10, 12]
 	}
 }
 
-@export var upgrade_costs: Dictionary = {"speed": 100, "power": 200}
-@export var instrument_costs: Dictionary = {"guitar": 500, "drums": 800}
-@export var global_combo_pattern: Array[int] = [1, 1, 1, 1]
+# --- НОВЫЕ НАСТРОЙКИ АПГРЕЙДОВ ---
+@export var upgrades_settings: Dictionary = {
+	# Апгрейды инструментов
+	"xylophone_base": {
+		"name": "Xylophone Power",
+		"cost_per_level": [100, 200, 300, 400, 500],
+		"bonus_per_level": [5, 10, 15, 20, 25]  # +5 очков за уровень
+	},
+	"xylophone_combo": {
+		"name": "Xylophone Combo",
+		"cost_per_level": [150, 300, 450],
+		"unlocks_pattern_line": [1, 3, 5]  # Разблокирует строчки паттерна
+	},
+	# Общие апгрейды
+	"global_multiplier": {
+		"name": "Global Multiplier",
+		"cost_per_level": [500, 1000, 1500],
+		"bonus_per_level": [0.1, 0.2, 0.3]  # +10% за уровень
+	}
+}

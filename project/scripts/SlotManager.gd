@@ -24,6 +24,7 @@ func _ready():
 	_setup_dialogs()
 	_connect_signals()
 	update_slots_display()
+	confirm_dialog.confirmed.connect(_on_confirm_delete)
 
 func _setup_dialogs():
 	confirm_dialog.dialog_text = "Удалить сохранение?"
@@ -71,6 +72,8 @@ func _on_delete_pressed(slot_number: int):
 func _on_confirm_delete():
 	if SaveSystem.delete_save(current_slot):
 		update_slots_display()
+	else:
+		push_error("Не удалось удалить сохранение!")
 
 func _on_name_confirmed(_text = ""):
 	var input_name = name_input.text.strip_edges()

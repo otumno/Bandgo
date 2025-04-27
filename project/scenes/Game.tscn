@@ -37,7 +37,7 @@ radius = 110.0
 script = ExtResource("1_cqeua")
 use_local_music = true
 local_music = ExtResource("2_f3117")
-music_volume = 0.5
+music_volume = 0.25
 
 [node name="TextureRect" type="TextureRect" parent="."]
 anchors_preset = 15
@@ -81,9 +81,6 @@ transition_sound = ExtResource("6_m7itv")
 fade_duration = 0.3
 fade_color = Color(1, 1, 1, 1)
 metadata/_edit_use_anchors_ = true
-
-[node name="Node" type="Node" parent="."]
-script = ExtResource("7_f3117")
 
 [node name="Instrument_Xylo" type="Area2D" parent="."]
 script = ExtResource("10_mvo24")
