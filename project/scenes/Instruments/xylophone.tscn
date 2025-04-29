@@ -1,0 +1,35 @@
+[gd_scene load_steps=10 format=3 uid="uid://b26bqkmk3hi5o"]
+
+[ext_resource type="Script" uid="uid://cyi4htwqahhjt" path="res://project/scripts/Instrument.gd" id="1_vlbhs"]
+[ext_resource type="AudioStream" uid="uid://1sgsdhge4w7g" path="res://project/assets/sounds/xylophon_1.ogg" id="2_eoq7y"]
+[ext_resource type="AudioStream" uid="uid://dgpfnx58hv8hk" path="res://project/assets/sounds/xylophon_2.ogg" id="3_7vrhm"]
+[ext_resource type="AudioStream" uid="uid://dlk4cmhqva4db" path="res://project/assets/sounds/xylophon_3.ogg" id="4_0yqa7"]
+[ext_resource type="AudioStream" uid="uid://clnxb7pknphow" path="res://project/assets/sounds/xylophon_4.ogg" id="5_h3h0p"]
+[ext_resource type="AudioStream" uid="uid://dxmcutit8pbbu" path="res://project/assets/sounds/xylophon_Fail.ogg" id="6_x8ecp"]
+[ext_resource type="PackedScene" uid="uid://cxu2mdfufhifo" path="res://project/scenes/ScorePopup.tscn" id="7_oavo0"]
+[ext_resource type="Texture2D" uid="uid://b77702pbc12b3" path="res://project/assets/textures/Xylophone.png" id="8_6jyws"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_w62g7"]
+size = Vector2(519.804, 113)
+
+[node name="Xylophone" type="Area2D"]
+script = ExtResource("1_vlbhs")
+sound_pattern = Array[AudioStream]([ExtResource("2_eoq7y"), ExtResource("3_7vrhm"), ExtResource("4_0yqa7"), ExtResource("5_h3h0p")])
+first_click_sound = ExtResource("4_0yqa7")
+fail_sound = ExtResource("6_x8ecp")
+instrument_type = "xylophone"
+input_keys = Array[String](["a"])
+score_popup_scene = ExtResource("7_oavo0")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(754, 934)
+scale = Vector2(0.715612, 0.715612)
+texture = ExtResource("8_6jyws")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(751.931, 870.059)
+rotation = -0.10472
+scale = Vector2(1, 1)
+shape = SubResource("RectangleShape2D_w62g7")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]

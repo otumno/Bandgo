@@ -1,6 +1,7 @@
 extends Area2D
 class_name Instrument
 
+# Настройки инструмента
 @export_category("Sound Settings")
 @export var sound_pattern: Array[AudioStream]
 @export var first_click_sound: AudioStream
@@ -23,18 +24,17 @@ class_name Instrument
 @export var hit_particles: GPUParticles2D
 @export var combo_particles: GPUParticles2D
 
-# Balance settings
+# Системные переменные
 var points_per_click: int
 var combo_window_seconds: float
 var combo_multipliers: Array
 var allow_multiple_hits_per_beat: bool
-
-# System variables
 var _base_points: int = 0
 var _current_combo_pattern: Array = []
 var _unlocked_sound_indices: Array = []
 var _beat_hit_status := {}
 var feedback_tween: Tween
+var current_level: int = 0
 
 @onready var audio_player: AudioStreamPlayer = $AudioStreamPlayer
 @onready var sprite: Sprite2D = $Sprite2D
@@ -52,7 +52,19 @@ func _ready():
 	_initialize_nodes()
 	_connect_signals()
 	_apply_upgrades()
-	base_scale = sprite.scale if sprite else Vector2.ONE
+	_setup_instrument()
+	add_to_group("instruments")
+	
+	# Подписываемся на сигнал разблокировки
+	var gm = get_node_or_null("/root/GameManager")
+	if gm:
+		gm.instrument_unlocked.connect(_on_instrument_unlocked)
+
+func _on_instrument_unlocked(unlocked_type: String):
+	if unlocked_type == instrument_type:
+		visible = true
+		_update_appearance()
+		print("Инструмент %s разблокирован!" % instrument_type)
 
 func _load_balance_settings():
 	var settings = GlobalBalanceManager.instrument_settings.get(instrument_type, {})
@@ -66,11 +78,14 @@ func _initialize_nodes():
 	if not audio_player:
 		audio_player = AudioStreamPlayer.new()
 		add_child(audio_player)
+	
 	if not sprite:
 		for child in get_children():
 			if child is Sprite2D:
 				sprite = child
 				break
+	
+	base_scale = sprite.scale if sprite else Vector2.ONE
 
 func _connect_signals():
 	bpm_manager = get_tree().current_scene.get_node("BPM_Manager")
@@ -80,8 +95,33 @@ func _connect_signals():
 	var gm = get_node_or_null("/root/GameManager")
 	if gm:
 		gm.upgrades_updated.connect(_apply_upgrades)
+		gm.instrument_upgraded.connect(_on_instrument_upgraded)
 
 	input_event.connect(_on_input_event)
+
+func _setup_instrument():
+	var gm = get_node_or_null("/root/GameManager")
+	if gm:
+		current_level = gm.get_instrument_level(instrument_type)
+		# Если уровень >= 1, инструмент должен быть видимым
+		if current_level >= 1:
+			visible = true
+		_update_appearance()
+
+func _on_instrument_upgraded(upgraded_type: String, level: int):
+	if upgraded_type == instrument_type:
+		current_level = level
+		_update_appearance()
+
+func _update_appearance():
+	var settings = GlobalBalanceManager.get_instrument_level_settings(instrument_type, current_level)
+	
+	if sprite and settings.has("texture") and settings.texture:
+		sprite.texture = settings.texture
+	
+	if settings.has("points"):
+		points_per_click = settings.points
+		_base_points = settings.points
 
 func _apply_upgrades():
 	var gm = get_node_or_null("/root/GameManager")

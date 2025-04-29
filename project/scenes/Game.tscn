@@ -1,4 +1,4 @@
-[gd_scene load_steps=30 format=3 uid="uid://crxvqga1dtvbn"]
+[gd_scene load_steps=31 format=3 uid="uid://crxvqga1dtvbn"]
 
 [ext_resource type="Script" uid="uid://chnxutp3hdm6t" path="res://project/scripts/SceneAudioHandler.gd" id="1_cqeua"]
 [ext_resource type="Texture2D" uid="uid://cbweq7e7c7pcd" path="res://project/assets/textures/6f018d8a158211f0a4402e814483879f_1.jpg" id="1_kgxh5"]
@@ -27,6 +27,7 @@
 [ext_resource type="Texture2D" uid="uid://b7nlbr70vc8v2" path="res://project/assets/textures/Tom1.png" id="24_n55ws"]
 [ext_resource type="AudioStream" uid="uid://cq36dei7pt3xs" path="res://project/assets/sounds/250-milliseconds-of-silence.mp3" id="27_4mt45"]
 [ext_resource type="PackedScene" uid="uid://cx8oae5mpuour" path="res://project/scenes/UpgradeMenu.tscn" id="27_s8cov"]
+[ext_resource type="PackedScene" uid="uid://b26bqkmk3hi5o" path="res://project/scenes/Instruments/xylophone.tscn" id="28_s8cov"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_f3117"]
 size = Vector2(519.804, 113)
@@ -84,10 +85,12 @@ fade_color = Color(1, 1, 1, 1)
 metadata/_edit_use_anchors_ = true
 
 [node name="Instrument_Xylo" type="Area2D" parent="."]
+visible = false
 script = ExtResource("10_mvo24")
 sound_pattern = Array[AudioStream]([ExtResource("14_lpm4y"), ExtResource("15_qlf8t"), ExtResource("16_n55ws"), ExtResource("17_rbt3f")])
 first_click_sound = ExtResource("14_lpm4y")
 fail_sound = ExtResource("15_ftep8")
+instrument_type = "xylophone"
 input_keys = Array[String](["a"])
 score_popup_scene = ExtResource("19_rbt3f")
 
@@ -104,6 +107,7 @@ shape = SubResource("RectangleShape2D_f3117")
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Instrument_Xylo"]
 
 [node name="Instrument_Tom" type="Area2D" parent="."]
+visible = false
 script = ExtResource("10_mvo24")
 sound_pattern = Array[AudioStream]([ExtResource("14_nooqs")])
 first_click_sound = ExtResource("14_nooqs")
@@ -219,3 +223,6 @@ offset_left = 3.96
 offset_top = 13.4
 offset_right = 4.67981
 offset_bottom = 13.6
+
+[node name="Xylophone" parent="." instance=ExtResource("28_s8cov")]
+visible = false

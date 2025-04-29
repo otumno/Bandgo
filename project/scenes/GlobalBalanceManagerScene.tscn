@@ -22,3 +22,30 @@ instrument_settings = {
 "points_per_click": 1
 }
 }
+instrument_levels = {
+"xylophone": {
+"base_price": 0,
+"levels": [{
+"points": 15,
+"texture": null,
+"unlock_required": 1
+}, {
+"points": 25,
+"texture": null,
+"unlock_required": 2
+}, null, null, null]
+}
+}
+upgrades_settings = {
+"Tom_unlock": {
+"bonus_per_level": [1, 2, 3],
+"cost_per_level": [500, 1000, 2000],
+"name": "TOMTOM",
+"unlocks_pattern_line": [0, 1, 2]
+},
+"xylophone_unlock": {
+"bonus_per_level": [1, 2, 3],
+"cost_per_level": [0, 1000, 10000],
+"name": "Xylophone Upgrade"
+}
+}
