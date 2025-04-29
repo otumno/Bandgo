@@ -11,21 +11,19 @@ func save_game(slot: int) -> bool:
 		push_error("Ошибка создания файла сохранения!")
 		return false
 
-	var gm = get_node("/root/GameManager")
 	var save_data = {
-		"version": 1,  # Добавляем версию для совместимости
-		"player_name": gm.player_name,
-		"score": gm.score,
-		"unlocked_instruments": gm.unlocked_instruments,
-		"upgrade_levels": gm.upgrade_levels,
-		"unlocked_combo_lines": gm.unlocked_combo_lines,
-		"timestamp": Time.get_unix_time_from_system()
+		"version": 2,
+		"player_name": GameManager.player_name,
+		"score": GameManager.score,
+		"unlocked_instruments": GameManager.unlocked_instruments,
+		"upgrade_levels": GameManager.upgrade_levels,
+		"unlocked_combo_lines": GameManager.unlocked_combo_lines
 	}
 	
 	file.store_var(save_data)
 	return true
 
-func load_game(slot: int) -> bool:
+func load_game(slot: int) -> bool:  # <-- Основной метод (была лишняя вложенная версия)
 	var path = _get_save_path(slot)
 	if not FileAccess.file_exists(path):
 		return false
@@ -35,7 +33,6 @@ func load_game(slot: int) -> bool:
 		push_error("Ошибка открытия файла сохранения!")
 		return false
 
-	# Проверяем размер файла
 	if file.get_length() < 4:
 		push_error("Файл сохранения повреждён (слишком маленький)")
 		return false

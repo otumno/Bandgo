@@ -1,37 +1,75 @@
-extends Control
+extends Panel
 
-@onready var upgrades_container = $ScrollContainer/VBoxContainer
-@onready var upgrade_button_scene = preload("res://project/scenes/UpgradeButton.tscn")
+@onready var scroll_container: ScrollContainer = $ScrollContainer
+@onready var upgrades_container: HBoxContainer = $ScrollContainer/HBoxContainer
+@onready var close_button: Button = $CloseButton
+@onready var purchase_sound: AudioStreamPlayer = $PurchaseSound
+@onready var error_sound: AudioStreamPlayer = $ErrorSound
+
+var upgrade_button_scene = preload("res://project/scenes/UpgradeButton.tscn")
+
+# Настройки размера кнопок
+const BUTTON_WIDTH := 300
+const BUTTON_HEIGHT := 120
+const BUTTON_MARGIN := 15
 
 func _ready():
+	# Настройка контейнера
+	upgrades_container.custom_minimum_size.y = BUTTON_HEIGHT + 20
+	upgrades_container.add_theme_constant_override("separation", BUTTON_MARGIN)
+	
+	close_button.pressed.connect(hide)
+	GameManager.upgrades_updated.connect(update_upgrades_list)
 	update_upgrades_list()
 
 func update_upgrades_list():
-	# Очищаем старые кнопки
+	# Очистка старых кнопок
 	for child in upgrades_container.get_children():
 		child.queue_free()
 	
-	var gm = get_node("/root/GameManager")
-	var balance = get_node("/root/GlobalBalanceManager")
+	await get_tree().process_frame  # Ждем завершения очистки
 	
-	# Создаем кнопки для каждого апгрейда
-	for upgrade_id in balance.upgrades_settings:
-		var settings = balance.upgrades_settings[upgrade_id]
-		var current_level = gm.upgrade_levels.get(upgrade_id, 0)
+	# Создаем новые кнопки
+	for upgrade_id in GlobalBalanceManager.upgrades_settings:
+		var settings = GlobalBalanceManager.upgrades_settings[upgrade_id]
+		var current_level = GameManager.upgrade_levels.get(upgrade_id, 0)
 		
-		# Если апгрейд не достиг максимального уровня
 		if current_level < settings["cost_per_level"].size():
 			var button = upgrade_button_scene.instantiate()
-			button.setup(upgrade_id, settings, current_level)
-			button.pressed.connect(_on_upgrade_pressed.bind(upgrade_id))
+			
+			# Настройка размера и положения
+			button.custom_minimum_size = Vector2(BUTTON_WIDTH, BUTTON_HEIGHT)
+			button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+			
 			upgrades_container.add_child(button)
+			
+			# Ждем инициализации кнопки
+			await get_tree().process_frame
+			
+			if button.has_method("setup"):
+				button.setup(upgrade_id, settings, current_level)
+				button.pressed.connect(_on_upgrade_pressed.bind(upgrade_id))
+			else:
+				button.queue_free()
+				push_error("UpgradeButton is missing setup() method")
 
 func _on_upgrade_pressed(upgrade_id: String):
-	var gm = get_node("/root/GameManager")
-	var balance = get_node("/root/GlobalBalanceManager")
-	var settings = balance.upgrades_settings[upgrade_id]
-	var current_level = gm.upgrade_levels.get(upgrade_id, 0)
-	var cost = settings["cost_per_level"][current_level]
+	var settings = GlobalBalanceManager.upgrades_settings.get(upgrade_id, {})
+	var current_level = GameManager.upgrade_levels.get(upgrade_id, 0)
+	var costs = settings.get("cost_per_level", [])
 	
-	if gm.upgrade(upgrade_id, cost):
-		update_upgrades_list()
+	if current_level >= costs.size():
+		return
+	
+	var cost = costs[current_level]
+	
+	if GameManager.upgrade(upgrade_id, cost):
+		purchase_sound.play()
+	else:
+		error_sound.play()
+		animate_error()
+
+func animate_error():
+	var tween = create_tween().set_parallel(true)
+	tween.tween_property(self, "modulate", Color.RED, 0.1)
+	tween.tween_property(self, "modulate", Color.WHITE, 0.3)

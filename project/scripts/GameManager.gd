@@ -2,7 +2,8 @@ extends Node
 
 signal score_updated(new_score)
 signal player_name_updated(new_name)
-signal upgrades_updated()  # Новый сигнал для обновления UI
+signal upgrades_updated()  # Сигнал при изменении апгрейдов
+signal instrument_unlocked(instrument_type: String)  # Сигнал при разблокировке инструмента
 
 var player_name: String = "Player":
 	set(value):
@@ -16,10 +17,10 @@ var score: int = 0:
 
 var current_slot: int = 1
 
-# --- НОВЫЕ ПЕРЕМЕННЫЕ ДЛЯ АПГРЕЙДОВ ---
+# --- Новые переменные для апгрейдов ---
 var unlocked_instruments: Array[String] = []  # Список купленных инструментов (например, ["xylophone", "drum"])
-var upgrade_levels: Dictionary = {}          # Уровни апгрейдов (например, {"xylophone_base": 2, "global_multiplier": 1})
-var unlocked_combo_lines: Dictionary = {}    # Разблокированные строчки комбо (например, {"xylophone": [true, false, true]})
+var upgrade_levels: Dictionary = {}           # Уровни апгрейдов (например, {"xylophone_base": 2})
+var unlocked_combo_lines: Dictionary = {}     # Разблокированные строчки комбо (например, {"xylophone": [true, false, true]})
 
 func reset():
 	player_name = "Player"
@@ -42,9 +43,10 @@ func add_score(points: int):
 func unlock_instrument(instrument_type: String):
 	if not unlocked_instruments.has(instrument_type):
 		unlocked_instruments.append(instrument_type)
+		emit_signal("instrument_unlocked", instrument_type)
 		emit_signal("upgrades_updated")
 
-# Повышение уровня апгрейда
+# Покупка апгрейда
 func upgrade(upgrade_id: String, cost: int) -> bool:
 	if score >= cost:
 		if not upgrade_levels.has(upgrade_id):
@@ -53,6 +55,14 @@ func upgrade(upgrade_id: String, cost: int) -> bool:
 			upgrade_levels[upgrade_id] += 1
 		score -= cost
 		emit_signal("score_updated", score)
+		
+		# Если апгрейд разблокирует строчку комбо — обновляем unlocked_combo_lines
+		var settings = GlobalBalanceManager.upgrades_settings.get(upgrade_id, {})
+		if settings.has("unlocks_pattern_line"):
+			var line_index = settings["unlocks_pattern_line"][upgrade_levels[upgrade_id] - 1]
+			var instrument_type = upgrade_id.split("_")[0]  # "xylophone_combo" → "xylophone"
+			unlock_combo_line(instrument_type, line_index)
+		
 		emit_signal("upgrades_updated")
 		return true
 	return false
