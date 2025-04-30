@@ -1,4 +1,4 @@
-[gd_scene load_steps=34 format=3 uid="uid://crxvqga1dtvbn"]
+[gd_scene load_steps=35 format=3 uid="uid://crxvqga1dtvbn"]
 
 [ext_resource type="Script" uid="uid://chnxutp3hdm6t" path="res://project/scripts/SceneAudioHandler.gd" id="1_cqeua"]
 [ext_resource type="Texture2D" uid="uid://cbweq7e7c7pcd" path="res://project/assets/textures/6f018d8a158211f0a4402e814483879f_1.jpg" id="1_kgxh5"]
@@ -25,6 +25,7 @@
 [ext_resource type="AudioStream" uid="uid://cwv6euhypeclj" path="res://project/assets/sounds/Pata/Hay1.mp3" id="23_3kfp1"]
 [ext_resource type="AudioStream" uid="uid://duudovo1yobfm" path="res://project/assets/sounds/Pata/Hay2.mp3" id="24_i1c61"]
 [ext_resource type="Texture2D" uid="uid://b7nlbr70vc8v2" path="res://project/assets/textures/Tom1.png" id="24_n55ws"]
+[ext_resource type="PackedScene" uid="uid://2mpj0r5wd4rl" path="res://project/scenes/InstrumentInfoDisplay.tscn" id="27_i1c61"]
 [ext_resource type="PackedScene" uid="uid://cx8oae5mpuour" path="res://project/scenes/UpgradeMenu.tscn" id="27_s8cov"]
 [ext_resource type="PackedScene" uid="uid://b26bqkmk3hi5o" path="res://project/scenes/Instruments/xylophone.tscn" id="28_s8cov"]
 [ext_resource type="PackedScene" uid="uid://6mtbhdt45dg6" path="res://project/scenes/Instruments/tomtom.tscn" id="29_sbvte"]
@@ -218,6 +219,7 @@ offset_bottom = 13.6
 
 [node name="Xylophone" parent="." instance=ExtResource("28_s8cov")]
 visible = false
+info_display_scene = ExtResource("27_i1c61")
 
 [node name="Sprite2D2" type="Sprite2D" parent="Xylophone"]
 position = Vector2(760, 1051)
@@ -226,6 +228,7 @@ texture = ExtResource("13_n55ws")
 
 [node name="Tomtom" parent="." instance=ExtResource("29_sbvte")]
 visible = false
+info_display_scene = ExtResource("27_i1c61")
 
 [node name="Sprite2D2" type="Sprite2D" parent="Tomtom"]
 position = Vector2(1182, 1050)
@@ -234,7 +237,9 @@ texture = ExtResource("13_n55ws")
 
 [node name="Pata" parent="." instance=ExtResource("30_3kfp1")]
 visible = false
+info_display_scene = ExtResource("27_i1c61")
 
 [node name="Pon" parent="." instance=ExtResource("31_i1c61")]
 visible = false
 sound_pattern = Array[AudioStream]([ExtResource("32_i1c61")])
+info_display_scene = ExtResource("27_i1c61")

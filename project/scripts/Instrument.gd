@@ -28,6 +28,10 @@ class_name Instrument
 @export var unlock_scale_effect := Vector2(1.3, 1.3)
 @export var unlock_effect_duration := 0.5
 
+@export_category("Info Display")
+@export var info_display_scene: PackedScene
+var info_display: Control
+
 var is_first_unlock := true  # Для одноразового эффекта
 
 # Системные переменные
@@ -59,12 +63,53 @@ func _ready():
 	_connect_signals()
 	_apply_upgrades()
 	_setup_instrument()
+	_setup_info_display()
 	add_to_group("instruments")
 	
 	# Подписываемся на сигнал разблокировки
 	var gm = get_node_or_null("/root/GameManager")
 	if gm:
 		gm.instrument_unlocked.connect(_on_instrument_unlocked)
+
+func _setup_info_display():
+	if info_display_scene and sprite:
+		info_display = info_display_scene.instantiate()
+		add_child(info_display)
+		
+		# Ждем один кадр для корректного расчета размеров
+		await get_tree().process_frame
+		
+		# Устанавливаем якоря в центр снизу спрайта
+		info_display.anchor_left = 0.5
+		info_display.anchor_right = 0.5
+		info_display.anchor_top = 1.0
+		info_display.anchor_bottom = 1.0
+		
+		# Сбрасываем позицию
+		info_display.position = Vector2.ZERO
+		
+		# Настройка отступов (подстраивайте под ваш размер инструментов)
+		var y_offset = 20  # Отступ от низа спрайта инструмента
+		info_display.offset_top = y_offset
+		info_display.offset_bottom = y_offset + info_display.size.y
+		info_display.offset_left = -info_display.size.x / 2
+		info_display.offset_right = info_display.size.x / 2
+		
+		# Для отладки
+		print("Дисплей размещен под инструментом: ", instrument_type)
+		print("Позиция относительно инструмента: ", info_display.position)
+		print("Глобальная позиция: ", info_display.global_position)
+
+func _process(delta):
+	if info_display and sprite:
+		var sprite_bottom = sprite.global_position.y + sprite.texture.get_height() * sprite.scale.y
+		info_display.global_position.x = sprite.global_position.x + sprite.texture.get_width() * sprite.scale.x / 2 - info_display.size.x / 2
+		info_display.global_position.y = sprite_bottom + 10
+
+
+func _update_info_display():
+	if info_display and info_display.has_method("update_display"):
+		info_display.update_display(current_level, current_combo_multiplier)
 
 func _on_instrument_unlocked(unlocked_type: String):
 	print("Instrument unlocked signal received:", unlocked_type)  # Отладочный вывод
@@ -207,9 +252,19 @@ func _handle_click():
 	_add_points(points_per_click * current_combo_multiplier)
 	_beat_hit_status[current_beat] = true
 	current_pattern_index += 1
+	
+	_update_info_display()
 
 func _update_combo(current_time: float):
 	var time_since_last_combo = (current_time - last_combo_time) / 1000.0
+	
+	# Сброс комбо, если прошло слишком много времени
+	if time_since_last_combo > combo_window_seconds:
+		if combo_count > 0:  # Только если комбо было
+			combo_count = 0
+			current_combo_multiplier = 1
+			_update_info_display()  # Обновляем отображение
+		return
 	
 	if time_since_last_combo <= combo_window_seconds:
 		combo_count += 1
@@ -219,11 +274,9 @@ func _update_combo(current_time: float):
 				current_combo_multiplier = combo_multipliers[_current_combo_pattern[pattern_index]]
 		else:
 			current_combo_multiplier = combo_multipliers[min(combo_count, combo_multipliers.size() - 1)]
-	else:
-		combo_count = 0
-		current_combo_multiplier = 1
 	
 	last_combo_time = current_time
+	_update_info_display()  # Обновляем после изменения комбо
 
 func _play_sound(sound: AudioStream):
 	audio_player.stream = sound
@@ -274,12 +327,21 @@ func _emit_particles(is_in_rhythm: bool):
 			combo_particles.modulate = combo_colors[color_idx]
 
 func _handle_fail_hit(is_double_hit: bool):
+	# Анимация сброса
+	if info_display and info_display.has_node("MultiplierLabel"):
+		var multiplier_label = info_display.get_node("MultiplierLabel")
+		var tween = create_tween()
+		tween.tween_property(multiplier_label, "modulate", Color.RED, 0.1)
+		tween.tween_property(multiplier_label, "modulate", Color.WHITE, 0.2)
+		tween.tween_callback(multiplier_label.set.bind("text", ""))
+	
 	combo_count = 0
 	current_combo_multiplier = 1
 	_play_fail_sound()
 	_add_points(points_per_click if !is_double_hit else 0)
 	if is_double_hit:
 		_show_combo_reset("Double hit!")
+	_update_info_display()
 
 func _show_combo_reset(message: String):
 	var popup_position = sprite.global_position if sprite else global_position

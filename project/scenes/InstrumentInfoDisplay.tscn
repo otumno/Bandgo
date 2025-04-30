@@ -1,0 +1,29 @@
+[gd_scene load_steps=4 format=3 uid="uid://2mpj0r5wd4rl"]
+
+[ext_resource type="Script" uid="uid://npd1ula88aqw" path="res://project/scripts/InstrumentInfoDisplay.gd" id="1_3r5n2"]
+[ext_resource type="Theme" uid="uid://3pqwyww8rrpc" path="res://project/themes/new_theme.tres" id="2_acf58"]
+[ext_resource type="FontFile" uid="uid://incgx0y42xki" path="res://project/Fonts/TOYZ.otf" id="3_imorw"]
+
+[node name="InstrumentInfoDisplay" type="HBoxContainer"]
+custom_minimum_size = Vector2(100, 30)
+alignment = 1
+script = ExtResource("1_3r5n2")
+
+[node name="LevelLabel" type="Label" parent="."]
+layout_mode = 2
+theme = ExtResource("2_acf58")
+theme_override_colors/font_color = Color(0.10748, 0.10748, 0.10748, 1)
+theme_override_fonts/font = ExtResource("3_imorw")
+theme_override_font_sizes/font_size = 56
+text = "2313"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="MultiplierLabel" type="Label" parent="."]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.10748, 0.10748, 0.10748, 1)
+theme_override_fonts/font = ExtResource("3_imorw")
+theme_override_font_sizes/font_size = 56
+text = "2313"
+horizontal_alignment = 1
+vertical_alignment = 1

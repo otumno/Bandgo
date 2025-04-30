@@ -10,7 +10,8 @@ func show_score(value: Variant, popup_position: Vector2, color: Color, multiplie
 	if value is String:
 		text = value
 	else:
-		text = "x%d %d" % [max(multiplier, 1), value] if multiplier > 1 else str(value)
+		# Убрали отображение множителя
+		text = str(value)
 	self.modulate = color
 	self.global_position = popup_position
 	self.modulate.a = 1.0
