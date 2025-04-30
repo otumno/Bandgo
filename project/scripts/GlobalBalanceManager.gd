@@ -26,24 +26,91 @@ extends Node
 				"unlock_required": 2
 			}
 		]
+	},
+	"tomtom": {
+		"base_price": 500,
+		"levels": [
+			{
+				"texture": null,
+				"points": 15,
+				"unlock_required": 1
+			},
+			{
+				"texture": null,
+				"points": 25,
+				"unlock_required": 2
+			}
+		]
+	},
+	"pata": {
+		"base_price": 500,
+		"levels": [
+			{
+				"texture": null,
+				"points": 15,
+				"unlock_required": 1
+			},
+			{
+				"texture": null,
+				"points": 25,
+				"unlock_required": 2
+			}
+		]
+	},
+	"pon": {
+		"base_price": 500,
+		"levels": [
+			{
+				"texture": null,
+				"points": 15,
+				"unlock_required": 1
+			},
+			{
+				"texture": null,
+				"points": 25,
+				"unlock_required": 2
+			}
+		]
 	}
 }
 
 @export_category("Upgrades Settings")
 @export var upgrades_settings: Dictionary = {
 	"xylophone_unlock": {
-		"name": "Xylophone Upgrade",
-		"cost_per_level": [500, 1000, 2000],
+		"name": "Xylophone",
+		"cost_per_level": [0, 1000, 2000],
 		"bonus_per_level": [1, 2, 3]
 	},
-	"Tom_unlock": {
-		"name": "TOMTOM",
+	"tomtom_unlock": {
+		"name": "tomtom",
+		"cost_per_level": [500, 1000, 2000],
+		"bonus_per_level": [1, 2, 3],
+		"unlocks_pattern_line": [0, 1, 2]
+	},
+	"pata_unlock": {
+		"name": "pata",
+		"cost_per_level": [500, 1000, 2000],
+		"bonus_per_level": [1, 2, 3],
+		"unlocks_pattern_line": [0, 1, 2]
+	},
+	"pon_unlock": {
+		"name": "pon",
 		"cost_per_level": [500, 1000, 2000],
 		"bonus_per_level": [1, 2, 3],
 		"unlocks_pattern_line": [0, 1, 2]
 	}
 }
-# Добавляем недостающую функцию
+
+@export_category("Global Upgrades")
+@export var global_upgrades: Dictionary = {
+	"global_multiplier": {
+		"name": "Глобальный множитель",
+		"cost_per_level": [1000, 2000, 5000],
+		"bonus_per_level": [0.1, 0.2, 0.3],
+		"affects_background": true
+	}
+}
+
 func get_instrument_level_settings(instrument_type: String, level: int) -> Dictionary:
 	if not instrument_levels.has(instrument_type):
 		return {}

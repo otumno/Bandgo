@@ -1,7 +1,8 @@
-[gd_scene load_steps=11 format=3 uid="uid://qjnkpl6bhcep"]
+[gd_scene load_steps=12 format=3 uid="uid://qjnkpl6bhcep"]
 
 [ext_resource type="Texture2D" uid="uid://c78ngijy4vill" path="res://project/assets/textures/39e37952158211f09aa8b6d248c3352f_1.jpg" id="1_87qkm"]
 [ext_resource type="Script" uid="uid://chnxutp3hdm6t" path="res://project/scripts/SceneAudioHandler.gd" id="1_776cj"]
+[ext_resource type="AudioStream" uid="uid://b67o18puu5c21" path="res://project/assets/sounds/Pata/1-03. Hoi Ya Hoi! Festival.mp3" id="2_1pc0d"]
 [ext_resource type="Script" uid="uid://c76uhy1vlvt8" path="res://project/scripts/PulsingBackground.gd" id="2_348qi"]
 [ext_resource type="Script" uid="uid://bffb657h6t2gn" path="res://project/scripts/SlotManager.gd" id="2_c52xp"]
 [ext_resource type="Script" uid="uid://dcgkg1reedxbq" path="res://project/scripts/NameInputDialog.gd" id="3_4mv2h"]
@@ -17,6 +18,8 @@ anchors_preset = 0
 offset_right = 1920.0
 offset_bottom = 1200.0
 script = ExtResource("1_776cj")
+use_local_music = true
+local_music = ExtResource("2_1pc0d")
 
 [node name="TextureRect" type="TextureRect" parent="."]
 layout_mode = 1
@@ -42,9 +45,6 @@ anchor_bottom = 0.5
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("2_c52xp")
-transition_sound = ExtResource("5_att4u")
-fade_duration = 1.0
-fade_color = Color(1, 1, 1, 1)
 
 [node name="SlotUI" type="VBoxContainer" parent="SlotManager"]
 unique_name_in_owner = true

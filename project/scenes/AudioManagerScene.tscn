@@ -1,8 +1,8 @@
 [gd_scene load_steps=3 format=3 uid="uid://chlk335ow4hq4"]
 
 [ext_resource type="Script" uid="uid://c4f0b5vqm5be7" path="res://project/scripts/AudioManager.gd" id="1_asb3a"]
-[ext_resource type="AudioStream" uid="uid://db40v2xtey67b" path="res://project/assets/sounds/audio_hero_Gangbusters_SIPML_J-0557.mp3" id="2_eblqx"]
+[ext_resource type="AudioStream" uid="uid://bfe0e1qa6iamu" path="res://project/assets/sounds/Pata/1-01. Mysterious Book.mp3" id="2_asb3a"]
 
 [node name="AudioManagerScene" type="Node"]
 script = ExtResource("1_asb3a")
-global_music = ExtResource("2_eblqx")
+global_music = ExtResource("2_asb3a")

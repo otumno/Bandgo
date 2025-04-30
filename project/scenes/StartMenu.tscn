@@ -28,7 +28,7 @@ grow_vertical = 2
 texture = ExtResource("1_w4ch6")
 script = ExtResource("3_n7fgp")
 bpm = 100
-beat_pattern = [false, true, true, true, false, true, true, true, false, true, true, true, false, true, true]
+beat_pattern = [true, true, true, false, true, true, true, false, true, true, true, false, true, true, true]
 max_scale = 1.01
 metadata/_edit_use_anchors_ = true
 

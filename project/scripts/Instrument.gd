@@ -24,6 +24,12 @@ class_name Instrument
 @export var hit_particles: GPUParticles2D
 @export var combo_particles: GPUParticles2D
 
+@export_category("Unlock Effects")
+@export var unlock_scale_effect := Vector2(1.3, 1.3)
+@export var unlock_effect_duration := 0.5
+
+var is_first_unlock := true  # Для одноразового эффекта
+
 # Системные переменные
 var points_per_click: int
 var combo_window_seconds: float
@@ -61,10 +67,29 @@ func _ready():
 		gm.instrument_unlocked.connect(_on_instrument_unlocked)
 
 func _on_instrument_unlocked(unlocked_type: String):
+	print("Instrument unlocked signal received:", unlocked_type)  # Отладочный вывод
 	if unlocked_type == instrument_type:
 		visible = true
 		_update_appearance()
 		print("Инструмент %s разблокирован!" % instrument_type)
+		
+		if is_first_unlock:
+			is_first_unlock = false
+			_play_unlock_effect()  # Эффект только при первом открытии
+			
+func _play_unlock_effect():
+	if not sprite:
+		return
+	
+	sprite.modulate.a = 0.0
+	sprite.scale = unlock_scale_effect  # Начальный увеличенный размер
+	
+	var tween = create_tween().set_parallel(true)
+	tween.tween_property(sprite, "modulate:a", 1.0, unlock_effect_duration)
+	
+	# Используем base_scale вместо Vector2.ONE, чтобы вернуться к исходному размеру
+	tween.tween_property(sprite, "scale", base_scale, unlock_effect_duration)\
+		 .set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
 
 func _load_balance_settings():
 	var settings = GlobalBalanceManager.instrument_settings.get(instrument_type, {})

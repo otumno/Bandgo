@@ -1,8 +1,8 @@
-[gd_scene load_steps=31 format=3 uid="uid://crxvqga1dtvbn"]
+[gd_scene load_steps=34 format=3 uid="uid://crxvqga1dtvbn"]
 
 [ext_resource type="Script" uid="uid://chnxutp3hdm6t" path="res://project/scripts/SceneAudioHandler.gd" id="1_cqeua"]
 [ext_resource type="Texture2D" uid="uid://cbweq7e7c7pcd" path="res://project/assets/textures/6f018d8a158211f0a4402e814483879f_1.jpg" id="1_kgxh5"]
-[ext_resource type="AudioStream" uid="uid://cgbv1cipijf0y" path="res://project/assets/sounds/703137__deadrobotmusic__ambient-piano-guitar-texture-e.ogg" id="2_f3117"]
+[ext_resource type="AudioStream" uid="uid://bfe0e1qa6iamu" path="res://project/assets/sounds/Pata/1-01. Mysterious Book.mp3" id="2_i1c61"]
 [ext_resource type="PackedScene" uid="uid://bud4ob6al1e2p" path="res://project/scenes/BeatIndicator.tscn" id="3_rbt3f"]
 [ext_resource type="Theme" uid="uid://3pqwyww8rrpc" path="res://project/themes/new_theme.tres" id="4_cqeua"]
 [ext_resource type="Script" uid="uid://ic6623dcahtt" path="res://project/scripts/GameBackButton.gd" id="4_m7itv"]
@@ -19,15 +19,18 @@
 [ext_resource type="Texture2D" uid="uid://bwobsrgdgjyrg" path="res://project/assets/textures/FRAME_1.png" id="16_ftep8"]
 [ext_resource type="AudioStream" uid="uid://dlk4cmhqva4db" path="res://project/assets/sounds/xylophon_3.ogg" id="16_n55ws"]
 [ext_resource type="Texture2D" uid="uid://dv6pg3jv73gwi" path="res://project/assets/textures/FRAME_2.png" id="17_27fkg"]
-[ext_resource type="AudioStream" uid="uid://b4yc4eov6sn8o" path="res://project/assets/sounds/Tac1.mp3" id="17_pwtkv"]
 [ext_resource type="AudioStream" uid="uid://clnxb7pknphow" path="res://project/assets/sounds/xylophon_4.ogg" id="17_rbt3f"]
-[ext_resource type="AudioStream" uid="uid://dn77en3rkyisk" path="res://project/assets/sounds/Tic1.mp3" id="18_mpdfd"]
 [ext_resource type="Texture2D" uid="uid://b77702pbc12b3" path="res://project/assets/textures/Xylophone.png" id="19_qlf8t"]
 [ext_resource type="PackedScene" uid="uid://cxu2mdfufhifo" path="res://project/scenes/ScorePopup.tscn" id="19_rbt3f"]
+[ext_resource type="AudioStream" uid="uid://cwv6euhypeclj" path="res://project/assets/sounds/Pata/Hay1.mp3" id="23_3kfp1"]
+[ext_resource type="AudioStream" uid="uid://duudovo1yobfm" path="res://project/assets/sounds/Pata/Hay2.mp3" id="24_i1c61"]
 [ext_resource type="Texture2D" uid="uid://b7nlbr70vc8v2" path="res://project/assets/textures/Tom1.png" id="24_n55ws"]
-[ext_resource type="AudioStream" uid="uid://cq36dei7pt3xs" path="res://project/assets/sounds/250-milliseconds-of-silence.mp3" id="27_4mt45"]
 [ext_resource type="PackedScene" uid="uid://cx8oae5mpuour" path="res://project/scenes/UpgradeMenu.tscn" id="27_s8cov"]
 [ext_resource type="PackedScene" uid="uid://b26bqkmk3hi5o" path="res://project/scenes/Instruments/xylophone.tscn" id="28_s8cov"]
+[ext_resource type="PackedScene" uid="uid://6mtbhdt45dg6" path="res://project/scenes/Instruments/tomtom.tscn" id="29_sbvte"]
+[ext_resource type="PackedScene" uid="uid://d13po65stxlat" path="res://project/scenes/Instruments/pata.tscn" id="30_3kfp1"]
+[ext_resource type="PackedScene" uid="uid://cfcc3dl621xrv" path="res://project/scenes/Instruments/pon.tscn" id="31_i1c61"]
+[ext_resource type="AudioStream" uid="uid://d1ybuhfyh30af" path="res://project/assets/sounds/Pata/pon-drum_YpFMJmj.mp3" id="32_i1c61"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_f3117"]
 size = Vector2(519.804, 113)
@@ -38,8 +41,8 @@ radius = 110.0
 [node name="Game" type="Node"]
 script = ExtResource("1_cqeua")
 use_local_music = true
-local_music = ExtResource("2_f3117")
-music_volume = 0.25
+local_music = ExtResource("2_i1c61")
+music_volume = 0.0
 
 [node name="TextureRect" type="TextureRect" parent="."]
 anchors_preset = 15
@@ -198,21 +201,10 @@ scale_up_amount = 10.0
 scale_down_amount = 3.0
 scale_effect_distance = 45.0
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
-position = Vector2(760, 1051)
-scale = Vector2(0.352319, 0.352319)
-texture = ExtResource("13_n55ws")
-
-[node name="Sprite2D" type="Sprite2D" parent="Sprite2D"]
-position = Vector2(1197.78, -2.83827)
-scale = Vector2(0.640826, 0.640826)
-texture = ExtResource("13_n55ws")
-
 [node name="BPM_Manager" type="Node2D" parent="."]
 script = ExtResource("7_f3117")
-bpm = 99
-metronome_pattern = Array[int]([1, 2, 2, 2])
-metronome_sounds = Array[AudioStream]([ExtResource("17_pwtkv"), ExtResource("18_mpdfd"), ExtResource("27_4mt45")])
+metronome_pattern = Array[int]([1, 2, 1, 2])
+metronome_sounds = Array[AudioStream]([ExtResource("23_3kfp1"), ExtResource("24_i1c61")])
 
 [node name="UpgradeMenu" parent="." instance=ExtResource("27_s8cov")]
 anchor_left = 0.012
@@ -226,3 +218,23 @@ offset_bottom = 13.6
 
 [node name="Xylophone" parent="." instance=ExtResource("28_s8cov")]
 visible = false
+
+[node name="Sprite2D2" type="Sprite2D" parent="Xylophone"]
+position = Vector2(760, 1051)
+scale = Vector2(0.352319, 0.352319)
+texture = ExtResource("13_n55ws")
+
+[node name="Tomtom" parent="." instance=ExtResource("29_sbvte")]
+visible = false
+
+[node name="Sprite2D2" type="Sprite2D" parent="Tomtom"]
+position = Vector2(1182, 1050)
+scale = Vector2(0.225775, 0.225775)
+texture = ExtResource("13_n55ws")
+
+[node name="Pata" parent="." instance=ExtResource("30_3kfp1")]
+visible = false
+
+[node name="Pon" parent="." instance=ExtResource("31_i1c61")]
+visible = false
+sound_pattern = Array[AudioStream]([ExtResource("32_i1c61")])
