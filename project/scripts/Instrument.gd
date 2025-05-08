@@ -24,15 +24,18 @@ class_name Instrument
 @export var hit_particles: GPUParticles2D
 @export var combo_particles: GPUParticles2D
 
+@export_category("Info Display")
+@export var info_display: Control
+@export var display_offset: Vector2 = Vector2(0, 50)
+@export var auto_position_display: bool = false
+
+@export_category("Combo Settings")
+@export var combo_enabled: bool = true
+@export var combo_reset_delay: float = 2.0
+
 @export_category("Unlock Effects")
 @export var unlock_scale_effect := Vector2(1.3, 1.3)
 @export var unlock_effect_duration := 0.5
-
-@export_category("Info Display")
-@export var info_display_scene: PackedScene
-var info_display: Control
-
-var is_first_unlock := true  # Для одноразового эффекта
 
 # Системные переменные
 var points_per_click: int
@@ -48,14 +51,15 @@ var current_level: int = 0
 
 @onready var audio_player: AudioStreamPlayer = $AudioStreamPlayer
 @onready var sprite: Sprite2D = $Sprite2D
-
 var bpm_manager: BPM_Manager
+
 var last_hit_time := 0.0
 var combo_count := 0
 var last_combo_time := 0.0
 var current_combo_multiplier := 1
 var current_pattern_index := 0
 var base_scale: Vector2
+var is_first_unlock := true
 
 func _ready():
 	_load_balance_settings()
@@ -63,84 +67,25 @@ func _ready():
 	_connect_signals()
 	_apply_upgrades()
 	_setup_instrument()
-	_setup_info_display()
 	add_to_group("instruments")
 	
-	# Подписываемся на сигнал разблокировки
-	var gm = get_node_or_null("/root/GameManager")
-	if gm:
-		gm.instrument_unlocked.connect(_on_instrument_unlocked)
-
-func _setup_info_display():
-	if info_display_scene and sprite:
-		info_display = info_display_scene.instantiate()
-		add_child(info_display)
-		
-		# Ждем один кадр для корректного расчета размеров
-		await get_tree().process_frame
-		
-		# Устанавливаем якоря в центр снизу спрайта
-		info_display.anchor_left = 0.5
-		info_display.anchor_right = 0.5
-		info_display.anchor_top = 1.0
-		info_display.anchor_bottom = 1.0
-		
-		# Сбрасываем позицию
-		info_display.position = Vector2.ZERO
-		
-		# Настройка отступов (подстраивайте под ваш размер инструментов)
-		var y_offset = 20  # Отступ от низа спрайта инструмента
-		info_display.offset_top = y_offset
-		info_display.offset_bottom = y_offset + info_display.size.y
-		info_display.offset_left = -info_display.size.x / 2
-		info_display.offset_right = info_display.size.x / 2
-		
-		# Для отладки
-		print("Дисплей размещен под инструментом: ", instrument_type)
-		print("Позиция относительно инструмента: ", info_display.position)
-		print("Глобальная позиция: ", info_display.global_position)
-
-func _process(delta):
-	if info_display and sprite:
-		var sprite_bottom = sprite.global_position.y + sprite.texture.get_height() * sprite.scale.y
-		info_display.global_position.x = sprite.global_position.x + sprite.texture.get_width() * sprite.scale.x / 2 - info_display.size.x / 2
-		info_display.global_position.y = sprite_bottom + 10
-
-
-func _update_info_display():
 	if info_display and info_display.has_method("update_display"):
 		info_display.update_display(current_level, current_combo_multiplier)
-
-func _on_instrument_unlocked(unlocked_type: String):
-	print("Instrument unlocked signal received:", unlocked_type)  # Отладочный вывод
-	if unlocked_type == instrument_type:
-		visible = true
-		_update_appearance()
-		print("Инструмент %s разблокирован!" % instrument_type)
+	elif info_display:
+		push_warning("InfoDisplay missing update_display() method for ", instrument_type)
 		
-		if is_first_unlock:
-			is_first_unlock = false
-			_play_unlock_effect()  # Эффект только при первом открытии
-			
-func _play_unlock_effect():
-	if not sprite:
-		return
-	
-	sprite.modulate.a = 0.0
-	sprite.scale = unlock_scale_effect  # Начальный увеличенный размер
-	
-	var tween = create_tween().set_parallel(true)
-	tween.tween_property(sprite, "modulate:a", 1.0, unlock_effect_duration)
-	
-	# Используем base_scale вместо Vector2.ONE, чтобы вернуться к исходному размеру
-	tween.tween_property(sprite, "scale", base_scale, unlock_effect_duration)\
-		 .set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+func _apply_upgrades():
+	# Здесь обновляются параметры инструмента на основе апгрейдов
+	var gm = get_node_or_null("/root/GameManager")
+	if gm:
+		current_level = gm.get_instrument_level(instrument_type)
+		_update_appearance()
 
 func _load_balance_settings():
 	var settings = GlobalBalanceManager.instrument_settings.get(instrument_type, {})
 	_base_points = settings.get("points_per_click", 10)
 	points_per_click = _base_points
-	combo_window_seconds = settings.get("combo_window_seconds", 2.0)
+	combo_window_seconds = settings.get("combo_window_seconds", combo_reset_delay)
 	combo_multipliers = Array(settings.get("combo_multipliers", PackedInt32Array([1, 2, 3, 5, 8])))
 	allow_multiple_hits_per_beat = settings.get("allow_multiple_hits", false)
 
@@ -156,9 +101,9 @@ func _initialize_nodes():
 				break
 	
 	base_scale = sprite.scale if sprite else Vector2.ONE
+	bpm_manager = get_tree().current_scene.get_node("BPM_Manager")
 
 func _connect_signals():
-	bpm_manager = get_tree().current_scene.get_node("BPM_Manager")
 	if bpm_manager:
 		bpm_manager.beat_triggered.connect(_on_beat)
 	
@@ -166,6 +111,7 @@ func _connect_signals():
 	if gm:
 		gm.upgrades_updated.connect(_apply_upgrades)
 		gm.instrument_upgraded.connect(_on_instrument_upgraded)
+		gm.instrument_unlocked.connect(_on_instrument_unlocked)
 
 	input_event.connect(_on_input_event)
 
@@ -173,15 +119,12 @@ func _setup_instrument():
 	var gm = get_node_or_null("/root/GameManager")
 	if gm:
 		current_level = gm.get_instrument_level(instrument_type)
-		# Если уровень >= 1, инструмент должен быть видимым
 		if current_level >= 1:
 			visible = true
 		_update_appearance()
-
-func _on_instrument_upgraded(upgraded_type: String, level: int):
-	if upgraded_type == instrument_type:
-		current_level = level
-		_update_appearance()
+		
+		if info_display and info_display.has_method("update_display"):
+			info_display.update_display(current_level, current_combo_multiplier)
 
 func _update_appearance():
 	var settings = GlobalBalanceManager.get_instrument_level_settings(instrument_type, current_level)
@@ -193,29 +136,39 @@ func _update_appearance():
 		points_per_click = settings.points
 		_base_points = settings.points
 
-func _apply_upgrades():
-	var gm = get_node_or_null("/root/GameManager")
-	if !gm:
+func _process(delta):
+	if auto_position_display and info_display and sprite:
+		var sprite_bottom = sprite.global_position.y + sprite.texture.get_height() * sprite.scale.y
+		info_display.global_position.x = sprite.global_position.x + sprite.texture.get_width() * sprite.scale.x / 2 - info_display.size.x / 2
+		info_display.global_position.y = sprite_bottom + display_offset.y
+
+func _on_instrument_unlocked(unlocked_type: String):
+	if unlocked_type == instrument_type:
+		visible = true
+		_update_appearance()
+		
+		if is_first_unlock:
+			is_first_unlock = false
+			_play_unlock_effect()
+
+func _play_unlock_effect():
+	if not sprite:
 		return
 	
-	# Apply base points upgrades
-	var upgrade_key = instrument_type + "_base"
-	if gm.upgrade_levels.has(upgrade_key):
-		var upgrade_settings = GlobalBalanceManager.upgrades_settings.get(upgrade_key, {})
-		var bonus_level = min(gm.upgrade_levels[upgrade_key] - 1, upgrade_settings.get("bonus_per_level", []).size() - 1)
-		if bonus_level >= 0:
-			var bonus = upgrade_settings["bonus_per_level"][bonus_level]
-			points_per_click = _base_points + bonus
+	sprite.modulate.a = 0.0
+	sprite.scale = unlock_scale_effect
 	
-	# Apply unlocked combo lines
-	_current_combo_pattern = []
-	_unlocked_sound_indices = []
-	if gm.unlocked_combo_lines.has(instrument_type):
-		for i in range(gm.unlocked_combo_lines[instrument_type].size()):
-			if gm.unlocked_combo_lines[instrument_type][i]:
-				_current_combo_pattern.append(i)
-				if i < sound_pattern.size():
-					_unlocked_sound_indices.append(i)
+	var tween = create_tween().set_parallel(true)
+	tween.tween_property(sprite, "modulate:a", 1.0, unlock_effect_duration)
+	tween.tween_property(sprite, "scale", base_scale, unlock_effect_duration)\
+		 .set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+
+func _on_instrument_upgraded(upgraded_type: String, level: int):
+	if upgraded_type == instrument_type:
+		current_level = level
+		_update_appearance()
+		if info_display and info_display.has_method("update_display"):
+			info_display.update_display(current_level, current_combo_multiplier)
 
 func _on_input_event(_viewport, event: InputEvent, _shape_idx):
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
@@ -240,43 +193,52 @@ func _handle_click():
 		_play_visual_feedback()
 		return
 
-	# Play sound from unlocked patterns
 	if _unlocked_sound_indices.size() > 0:
 		var sound_index = _unlocked_sound_indices[current_pattern_index % _unlocked_sound_indices.size()]
 		_play_sound(sound_pattern[sound_index])
 	elif sound_pattern.size() > 0:
 		_play_sound(sound_pattern[current_pattern_index % sound_pattern.size()])
 
-	_update_combo(current_time)
+	if combo_enabled:
+		_update_combo(current_time)
+	else:
+		current_combo_multiplier = 1
+		combo_count = 0
+	
 	_play_visual_feedback()
 	_add_points(points_per_click * current_combo_multiplier)
 	_beat_hit_status[current_beat] = true
 	current_pattern_index += 1
 	
-	_update_info_display()
+	if info_display and info_display.has_method("update_display"):
+		info_display.update_display(current_level, current_combo_multiplier)
 
 func _update_combo(current_time: float):
 	var time_since_last_combo = (current_time - last_combo_time) / 1000.0
-	
-	# Сброс комбо, если прошло слишком много времени
 	if time_since_last_combo > combo_window_seconds:
-		if combo_count > 0:  # Только если комбо было
+		if combo_count > 0:
 			combo_count = 0
 			current_combo_multiplier = 1
-			_update_info_display()  # Обновляем отображение
+			_update_info_display()
 		return
-	
-	if time_since_last_combo <= combo_window_seconds:
-		combo_count += 1
-		if _current_combo_pattern.size() > 0:
-			var pattern_index = combo_count % _current_combo_pattern.size()
-			if pattern_index < combo_multipliers.size():
-				current_combo_multiplier = combo_multipliers[_current_combo_pattern[pattern_index]]
+
+	combo_count += 1
+	if _current_combo_pattern.size() > 0:
+		var pattern_index = (combo_count - 1) % _current_combo_pattern.size()
+		if pattern_index < combo_multipliers.size():
+			current_combo_multiplier = combo_multipliers[pattern_index]
+	else:
+		if combo_count <= combo_multipliers.size():
+			current_combo_multiplier = combo_multipliers[combo_count - 1]
 		else:
-			current_combo_multiplier = combo_multipliers[min(combo_count, combo_multipliers.size() - 1)]
-	
+			current_combo_multiplier = combo_multipliers[-1]
+
 	last_combo_time = current_time
-	_update_info_display()  # Обновляем после изменения комбо
+	_update_info_display()
+
+func _update_info_display():
+	if info_display and info_display.has_method("update_display"):
+		info_display.update_display(current_level, current_combo_multiplier)
 
 func _play_sound(sound: AudioStream):
 	audio_player.stream = sound
@@ -327,14 +289,6 @@ func _emit_particles(is_in_rhythm: bool):
 			combo_particles.modulate = combo_colors[color_idx]
 
 func _handle_fail_hit(is_double_hit: bool):
-	# Анимация сброса
-	if info_display and info_display.has_node("MultiplierLabel"):
-		var multiplier_label = info_display.get_node("MultiplierLabel")
-		var tween = create_tween()
-		tween.tween_property(multiplier_label, "modulate", Color.RED, 0.1)
-		tween.tween_property(multiplier_label, "modulate", Color.WHITE, 0.2)
-		tween.tween_callback(multiplier_label.set.bind("text", ""))
-	
 	combo_count = 0
 	current_combo_multiplier = 1
 	_play_fail_sound()

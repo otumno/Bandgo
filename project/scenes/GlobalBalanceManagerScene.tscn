@@ -4,3 +4,11 @@
 
 [node name="GlobalBalanceManagerScene" type="Node2D"]
 script = ExtResource("1_bvonl")
+instrument_settings = {
+"default": {
+"allow_multiple_hits": false,
+"combo_multipliers": [2, 2, 3, 5, 8],
+"combo_window_seconds": 2.0,
+"points_per_click": 10
+}
+}
