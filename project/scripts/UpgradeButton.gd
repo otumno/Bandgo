@@ -7,87 +7,60 @@ extends Button
 
 var upgrade_id: String = ""
 var current_level: int = 0
+var gm: Node
 
 func _ready():
-	if not _validate_nodes():
-		queue_free()
-		return
+	# Ждем полной инициализации
+	await get_tree().process_frame
+	gm = get_node("/root/GameManager") if has_node("/root/GameManager") else null
 	
-	lock_icon.visible = false
-	add_theme_stylebox_override("normal", get_theme_stylebox("panel"))
-	add_theme_stylebox_override("hover", get_theme_stylebox("panel_hover"))
-	add_theme_stylebox_override("pressed", get_theme_stylebox("panel_pressed"))
-	
-	# Подключаем сигнал обновления очков
-	if has_node("/root/GameManager"):
-		GameManager.score_updated.connect(_on_score_updated)
+	# Принудительно показываем элементы
+	if name_label: 
+		name_label.show()
+		name_label.text = "Loading..."
+	if level_label: level_label.show()
+	if cost_label: cost_label.show()
+	if lock_icon: lock_icon.hide()
 
 func setup(id: String, settings: Dictionary, level: int):
 	upgrade_id = id
 	current_level = level
 	
-	if not _validate_settings(settings):
-		return
+	# Устанавливаем текст
+	if name_label:
+		name_label.text = settings.get("name", "NO NAME")
+		name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	
-	name_label.text = settings["name"]
-	level_label.text = "Ур. %d/%d" % [level + 1, settings["cost_per_level"].size()]
+	if level_label:
+		level_label.text = "Lv.%d" % (level + 1)
+		level_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	
-	var costs = settings["cost_per_level"]
-	if level < costs.size():
-		cost_label.text = "%d очков" % costs[level]
-		_update_affordability(costs[level])
-	else:
-		cost_label.text = "MAX"
-		lock_icon.visible = true
-		modulate = Color(0.7, 0.7, 0.7)
-
-func _validate_nodes() -> bool:
-	var valid = true
-	
-	if not name_label:
-		push_error("NameLabel not found!")
-		valid = false
-	if not level_label:
-		push_error("LevelLabel not found!")
-		valid = false
-	if not cost_label:
-		push_error("CostLabel not found!")
-		valid = false
-	if not lock_icon:
-		push_error("LockOverlay not found!")
-		valid = false
-	
-	return valid
-
-func _validate_settings(settings: Dictionary) -> bool:
-	if settings.is_empty():
-		push_error("Empty upgrade settings!")
-		return false
-	if not settings.has("cost_per_level"):
-		push_error("Missing cost_per_level in settings!")
-		return false
-	return true
-
-func _on_score_updated(_new_score: int):
-	# Обновляем доступность при изменении очков
-	var settings = GlobalBalanceManager.upgrades_settings.get(upgrade_id, {})
 	var costs = settings.get("cost_per_level", [])
-	if current_level < costs.size():
-		_update_affordability(costs[current_level])
+	if cost_label:
+		cost_label.text = "%d pts" % costs[level] if level < costs.size() else "MAX"
+		cost_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	
+	# Настройка видимости
+	self.text = ""
+	self.custom_minimum_size = Vector2(250, 80)
+	
+	# Обновляем доступность
+	if gm:
+		_update_affordability(costs[level] if level < costs.size() else 0)
 
 func _update_affordability(cost: int):
-	if not has_node("/root/GameManager"):
+	if not gm:
 		return
 	
-	var can_afford = GameManager.score >= cost
-	print("Upgrade: ", upgrade_id, " | Cost: ", cost, " | Score: ", GameManager.score, " | Can afford: ", can_afford)  # Отладочный вывод
-	
+	var can_afford = gm.score >= cost
 	modulate = Color.WHITE if can_afford else Color(0.6, 0.6, 0.6, 0.8)
-	lock_icon.visible = not can_afford
-	cost_label.modulate = Color.GREEN if can_afford else Color.RED
+	if lock_icon:
+		lock_icon.visible = not can_afford
+	if cost_label:
+		cost_label.modulate = Color.GREEN if can_afford else Color.RED
 
 func _on_pressed():
-	if not has_node("/root/GameManager"):
+	if not gm:
 		return
 	
 	var settings = GlobalBalanceManager.upgrades_settings.get(upgrade_id, {})
@@ -96,5 +69,5 @@ func _on_pressed():
 	if current_level >= costs.size():
 		return
 	
-	if GameManager.upgrade(upgrade_id, costs[current_level]):
+	if gm.upgrade(upgrade_id, costs[current_level]):
 		queue_free()

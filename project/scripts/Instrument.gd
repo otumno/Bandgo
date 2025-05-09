@@ -11,6 +11,10 @@ class_name Instrument
 @export_category("Instrument Type")
 @export var instrument_type: String = "default"
 
+@export_category("Input Settings")
+@export var allow_multiple_hits_per_beat: bool = false  # Добавлено
+@export var input_keys: Array[String]
+
 @export_category("Visual Feedback")
 @export var score_popup_scene: PackedScene
 @export var combo_colors: Array[Color] = [Color.GOLD, Color.CRIMSON, Color.DEEP_SKY_BLUE]
@@ -22,13 +26,26 @@ class_name Instrument
 @export var combo_enabled: bool = true
 @export var combo_reset_delay: float = 2.0
 
+# Добавляем настройки размера
+@export_category("Appearance Settings")
+@export var base_size: Vector2 = Vector2(100, 100)
+@export var unlock_scale_effect: Vector2 = Vector2(1.3, 1.3)
+@export var unlock_effect_duration: float = 0.5
+@export var feedback_duration: float = 0.15
+
 # Системные переменные
 var points_per_click: int
+var combo_window_seconds: float
+var combo_multipliers: Array
 var _current_combo_multiplier: int = 1
-var _unlocked_patterns: int = 1
-var _last_combo_time: float = 0.0
-var _combo_count: int = 0
+var current_pattern_index: int = 0  # Добавлено
+var _current_beat: int = 0
 var _beat_hit_status := {}
+var _combo_count: int = 0
+var _last_combo_time: float = 0.0
+var base_scale: Vector2 = Vector2.ONE
+var target_scale: Vector2 = Vector2.ONE
+var _unlocked_patterns: int = 1
 
 @onready var audio_player: AudioStreamPlayer = $AudioStreamPlayer
 @onready var sprite: Sprite2D = $Sprite2D
@@ -36,9 +53,24 @@ var bpm_manager: BPM_Manager
 
 func _ready():
 	_load_balance_settings()
+	if GameManager.unlocked_instruments.has(instrument_type):
+		visible = true  # Делаем видимым, если инструмент разблокирован
 	_initialize_nodes()
 	_connect_signals()
 	_apply_upgrades()
+	# Инициализация размера
+	if sprite:
+		# Рассчитываем нужный масштаб для достижения base_size
+		var texture_size = sprite.texture.get_size() if sprite.texture else Vector2.ONE
+		base_scale = Vector2(
+			base_size.x / texture_size.x,
+			base_size.y / texture_size.y
+		)
+		sprite.scale = base_scale * 0.5  # Начальный размер для анимации появления
+		target_scale = base_scale
+		
+		# Запускаем анимацию появления
+		_play_unlock_effect()
 
 func _load_balance_settings():
 	var settings = GlobalBalanceManager.instrument_settings.get(instrument_type, {})
@@ -95,28 +127,57 @@ func _handle_click():
 	var current_time = Time.get_ticks_msec() / 1000.0
 	var current_beat = bpm_manager.current_beat if bpm_manager else 0
 
-	if bpm_manager and !bpm_manager.is_playing:
+	if !allow_multiple_hits_per_beat && _beat_hit_status.get(current_beat, false):
+		_handle_fail_hit(true)
+		return
+
+	if bpm_manager && !bpm_manager.is_playing:
 		bpm_manager.start_metronome()
 		if first_click_sound:
 			_play_sound(first_click_sound)
 		_play_visual_feedback()
 		return
 
-	if _beat_hit_status.get(current_beat, false):
-		_handle_fail_hit(true)
-		return
-
+	# Воспроизведение звука
 	var available_patterns = _get_available_patterns()
 	if available_patterns.size() > 0:
 		var pattern_index = _combo_count % available_patterns.size()
 		_play_sound(available_patterns[pattern_index])
 
+	# Обработка комбо
 	if combo_enabled:
 		_update_combo(current_time)
 
-	GameManager.add_score(points_per_click * _current_combo_multiplier)
+	# Добавление очков
+	var points = points_per_click * _current_combo_multiplier
+	GameManager.add_score(points)
+	
+	# Показ попапа очков (используем старый рабочий метод)
+	if score_popup_scene:
+		var popup_pos = global_position
+		if sprite:
+			# Центр спрайта инструмента
+			popup_pos = sprite.global_position + Vector2(
+				sprite.texture.get_width() * sprite.scale.x / 2,
+				-sprite.texture.get_height() * sprite.scale.y / 2
+			)
+		_show_score_popup(points, popup_pos)
+	
 	_play_visual_feedback()
 	_beat_hit_status[current_beat] = true
+	current_pattern_index += 1
+
+func _show_score_popup(points: int, popup_pos: Vector2):
+	var popup = score_popup_scene.instantiate()
+	get_tree().root.add_child(popup)
+	var color = _get_popup_color()
+	popup.show_score(points, popup_pos, color, _current_combo_multiplier)
+
+func _get_popup_color() -> Color:
+	if _combo_count >= 3 and combo_colors.size() > 0:
+		var color_idx = min(_combo_count - 3, combo_colors.size() - 1)
+		return combo_colors[color_idx]
+	return Color.WHITE
 
 func _get_available_patterns() -> Array:
 	if sound_pattern.size() <= _unlocked_patterns:
@@ -153,12 +214,12 @@ func _play_visual_feedback():
 	if not sprite or not enable_visual_feedback:
 		return
 	
-	var target_scale = Vector2.ONE * feedback_scale * (1.0 + 0.05 * _current_combo_multiplier)
-	target_scale = target_scale.clamp(Vector2.ONE, Vector2.ONE * max_scale_limit)
+	var target_feedback_scale = target_scale * feedback_scale * (1.0 + 0.05 * _current_combo_multiplier)
+	target_feedback_scale = target_feedback_scale.clamp(target_scale, target_scale * max_scale_limit)
 	
 	var tween = create_tween()
-	tween.tween_property(sprite, "scale", target_scale, 0.1)
-	tween.tween_property(sprite, "scale", Vector2.ONE, 0.3)
+	tween.tween_property(sprite, "scale", target_feedback_scale, feedback_duration * 0.5)
+	tween.tween_property(sprite, "scale", target_scale, feedback_duration * 0.5)
 
 func _on_instrument_unlocked(unlocked_type: String):
 	if unlocked_type == instrument_type:
@@ -166,8 +227,10 @@ func _on_instrument_unlocked(unlocked_type: String):
 		_play_unlock_effect()
 
 func _play_unlock_effect():
-	var tween = create_tween()
-	sprite.modulate.a = 0
-	tween.tween_property(sprite, "modulate:a", 1.0, 0.5)
-	tween.parallel().tween_property(sprite, "scale", Vector2(1.2, 1.2), 0.3)
-	tween.tween_property(sprite, "scale", Vector2.ONE, 0.2)
+	if not sprite:
+		return
+	
+	var tween = create_tween().set_parallel(true)
+	tween.tween_property(sprite, "scale", target_scale * unlock_scale_effect, unlock_effect_duration * 0.5)
+	tween.tween_property(sprite, "modulate:a", 1.0, unlock_effect_duration)
+	tween.tween_property(sprite, "scale", target_scale, unlock_effect_duration).set_delay(unlock_effect_duration * 0.5)

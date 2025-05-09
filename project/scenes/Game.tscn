@@ -217,12 +217,16 @@ offset_bottom = 13.6
 [node name="Xylophone" parent="." instance=ExtResource("28_s8cov")]
 visible = false
 combo_sounds = Array[AudioStream]([])
+input_keys = Array[AudioStream]([])
 combo_colors = Array[Color]([Color(1, 0.843137, 0, 1), Color(0.862745, 0.0784314, 0.235294, 1), Color(0, 0.74902, 1, 1)])
 enable_visual_feedback = true
 feedback_scale = 1.1
 max_scale_limit = 1.3
 combo_enabled = true
 combo_reset_delay = 2.0
+unlock_scale_effect = Vector2(1.3, 1.3)
+unlock_effect_duration = 0.5
+feedback_duration = 0.15
 
 [node name="Sprite2D2" type="Sprite2D" parent="Xylophone"]
 position = Vector2(760, 1051)
@@ -231,6 +235,7 @@ texture = ExtResource("13_n55ws")
 
 [node name="Tomtom" parent="." instance=ExtResource("29_sbvte")]
 visible = false
+input_keys = Array[AudioStream]([])
 
 [node name="Sprite2D2" type="Sprite2D" parent="Tomtom"]
 position = Vector2(1182, 1050)
@@ -239,7 +244,9 @@ texture = ExtResource("13_n55ws")
 
 [node name="Pata" parent="." instance=ExtResource("30_3kfp1")]
 visible = false
+input_keys = Array[AudioStream]([])
 
 [node name="Pon" parent="." instance=ExtResource("31_i1c61")]
 visible = false
 sound_pattern = Array[AudioStream]([ExtResource("32_i1c61")])
+input_keys = Array[AudioStream]([])

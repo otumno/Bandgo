@@ -1,7 +1,14 @@
 [gd_scene load_steps=2 format=3 uid="uid://cxu2mdfufhifo"]
 
-[ext_resource type="Script" uid="uid://bg461mh3d4un4" path="res://project/scripts/ScorePopup.gd" id="1_p4a62"]
+[ext_resource type="Script" uid="uid://dcqkrwqawcjkk" path="res://project/scripts/ScorePopup1.gd" id="1_p4a62"]
 
-[node name="ScorePopup" type="Label"]
-theme_override_font_sizes/font_size = 50
+[node name="ScorePopup" type="Node2D"]
 script = ExtResource("1_p4a62")
+
+[node name="Label" type="Label" parent="."]
+offset_right = 40.0
+offset_bottom = 23.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 30
+horizontal_alignment = 1
+vertical_alignment = 1

@@ -1,5 +1,4 @@
 extends Control
-# Управление слотами сохранений
 
 @onready var slot_buttons: Array[Button] = [
 	$SlotUI/HBoxContainer/Slot1Button,
@@ -27,12 +26,10 @@ func _ready():
 	update_slots_display()
 	confirm_dialog.confirmed.connect(_on_confirm_delete)
 
-# Настройка диалоговых окон
 func _setup_dialogs():
 	confirm_dialog.dialog_text = "Удалить сохранение?"
 	name_dialog.title = "Введите имя игрока"
 
-# Подключение сигналов
 func _connect_signals():
 	for i in slot_buttons.size():
 		if slot_buttons[i]:
@@ -43,7 +40,6 @@ func _connect_signals():
 	name_input.text_submitted.connect(_on_name_confirmed)
 	name_ok_button.pressed.connect(_on_name_confirmed)
 
-# Обновление отображения слотов
 func update_slots_display():
 	for i in 3:
 		var save_info = SaveSystem.get_save_info(i + 1)
@@ -52,12 +48,11 @@ func update_slots_display():
 			delete_buttons[i].visible = false
 		else:
 			slot_buttons[i].text = "%s\nОчки: %d" % [
-				save_info.get("player_name", ""),
-				save_info.get("score", 0)
+				str(save_info.get("player_name", "")),
+				int(save_info.get("score", 0))
 			]
 			delete_buttons[i].visible = true
 
-# Обработка нажатия на слот
 func _on_slot_pressed(slot_number: int):
 	if _is_transitioning: 
 		return
@@ -72,7 +67,6 @@ func _on_slot_pressed(slot_number: int):
 	else:
 		_start_game_transition()
 
-# Обработка удаления сохранения
 func _on_delete_pressed(slot_number: int):
 	current_slot = slot_number
 	confirm_dialog.popup_centered()
@@ -83,7 +77,6 @@ func _on_confirm_delete():
 	else:
 		push_error("Не удалось удалить сохранение!")
 
-# Подтверждение имени для нового сохранения
 func _on_name_confirmed(_text = ""):
 	var input_name = name_input.text.strip_edges()
 	if input_name.is_empty(): 
@@ -91,27 +84,43 @@ func _on_name_confirmed(_text = ""):
 	
 	var gm = get_node("/root/GameManager")
 	if gm:
+		# Создаем новый массив строк для инструментов
+		var initial_instruments: Array[String] = ["xylophone"]
+		
 		gm.reset()
 		gm.player_name = input_name
 		gm.score = 0
 		gm.current_slot = current_slot
+		gm.unlocked_instruments = initial_instruments
 		
 		if SaveSystem.save_game(current_slot):
 			name_dialog.hide()
 			_start_game_transition()
 
-# Запуск перехода в игру
 func _start_game_transition():
 	if _is_transitioning: 
 		return
 	
 	_is_transitioning = true
 	
-	if not SaveSystem.load_game(current_slot):
-		push_error("Ошибка загрузки сохранения!")
-		_is_transitioning = false
-		return
+	var save_data = SaveSystem.get_save_info(current_slot)
+	if save_data.is_empty():
+		# Создаём новый массив с явным указанием типа
+		var initial_instruments: Array[String] = ["xylophone"]
+		
+		GameManager.reset()
+		GameManager.player_name = "Player"
+		GameManager.score = 0
+		GameManager.current_slot = current_slot
+		GameManager.unlocked_instruments = initial_instruments
+	else:
+		# Загружаем через SaveSystem с гарантией преобразования типов
+		if not SaveSystem.load_game(current_slot):
+			push_error("Ошибка загрузки сохранения!")
+			_is_transitioning = false
+			return
 	
+	# Переход на сцену
 	var target_scene = "res://project/scenes/Game.tscn"
 	if has_node("/root/SceneTransitionManager"):
 		get_node("/root/SceneTransitionManager").transition_to_scene(target_scene)

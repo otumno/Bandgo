@@ -35,6 +35,12 @@ var upgrade_levels: Dictionary = {}                # Уровни улучшен
 var unlocked_combo_lines: Dictionary = {}          # Открытые паттерны (например, {"xylophone": 3})
 
 func _ready():
+		# Загрузка сохранений при старте
+	if not SaveSystem.load_game(current_slot):
+		# Инициализация первого инструмента
+		unlocked_instruments.append("xylophone")
+		upgrades_updated.emit()
+	
 	load_default_settings()
 	print("GameManager initialized for slot ", current_slot)
 
@@ -165,16 +171,21 @@ func get_save_data() -> Dictionary:
 
 # Загрузка сохраненных данных
 func load_save_data(data: Dictionary):
-	if typeof(data) != TYPE_DICTIONARY:
-		push_error("Invalid save data format!")
-		return
+	# Явное преобразование типов
+	player_name = str(data.get("player_name", "Player"))
+	score = int(data.get("score", 0))
 	
-	player_name = data.get("player_name", "Player")
-	score = data.get("score", 0)
-	unlocked_instruments = data.get("unlocked_instruments", [])
-	upgrade_levels = data.get("upgrade_levels", {})
-	unlocked_combo_lines = data.get("unlocked_combo_lines", {})
+	# Критически важное преобразование массива
+	unlocked_instruments = _convert_to_string_array(data.get("unlocked_instruments", []))
+	
+	upgrade_levels = data.get("upgrade_levels", {}).duplicate()
+	unlocked_combo_lines = data.get("unlocked_combo_lines", {}).duplicate()
 	
 	emit_signal("score_updated", score)
 	emit_signal("upgrades_updated")
-	print("Game state loaded from save data")
+
+func _convert_to_string_array(array: Array) -> Array[String]:
+	var result: Array[String] = []
+	for item in array:
+		result.append(str(item))
+	return result

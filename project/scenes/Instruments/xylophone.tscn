@@ -13,27 +13,14 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_w62g7"]
 size = Vector2(519.804, 113)
 
-[node name="Xylophone" type="Area2D" node_paths=PackedStringArray("info_display")]
+[node name="Xylophone" type="Area2D"]
 script = ExtResource("1_vlbhs")
 sound_pattern = Array[AudioStream]([ExtResource("2_eoq7y"), ExtResource("3_7vrhm"), ExtResource("4_0yqa7"), ExtResource("5_h3h0p")])
 first_click_sound = ExtResource("4_0yqa7")
-combo_sounds = null
 fail_sound = ExtResource("6_x8ecp")
 instrument_type = "xylophone"
 input_keys = Array[String](["a"])
 score_popup_scene = ExtResource("7_oavo0")
-combo_colors = null
-enable_visual_feedback = null
-feedback_scale = null
-feedback_duration = null
-max_scale_limit = null
-info_display = NodePath("InfoDisplay")
-display_offset = Vector2(0, 0)
-auto_position_display = null
-combo_enabled = null
-combo_reset_delay = null
-unlock_scale_effect = null
-unlock_effect_duration = null
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 position = Vector2(754, 934)
