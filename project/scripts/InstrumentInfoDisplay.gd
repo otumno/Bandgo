@@ -1,37 +1,25 @@
 extends Control
 
-@onready var level_label: Label = $PanelContainer/HBoxContainer/LevelLabel
-@onready var multiplier_label: Label = $PanelContainer/HBoxContainer/MultiplierLabel
+var level_label: Label
+var multiplier_label: Label
 
 func _ready():
+	level_label = get_node_or_null("PanelContainer/HBoxContainer/LevelLabel")
+	multiplier_label = get_node_or_null("PanelContainer/HBoxContainer/MultiplierLabel")
 	if level_label:
-		level_label.text = ""
-		print("InstrumentInfoDisplay: level_label initialized")
-	else:
-		push_error("InstrumentInfoDisplay: level_label not found")
-	
+		level_label.text = "Lv.0"
 	if multiplier_label:
-		multiplier_label.text = ""
-		multiplier_label.visible = false
-		print("InstrumentInfoDisplay: multiplier_label initialized")
+		multiplier_label.text = "x1"
 	else:
-		push_error("InstrumentInfoDisplay: multiplier_label not found")
+		push_warning("InstrumentInfoDisplay: MultiplierLabel not found")
 
 func update_display(level: int, multiplier: int):
 	if level_label:
 		level_label.text = "Lv.%d" % level
-		print("InstrumentInfoDisplay: Updated level_label to Lv.%d" % level)
 	else:
-		push_error("InstrumentInfoDisplay: level_label is null during update")
-	
+		push_warning("InstrumentInfoDisplay: LevelLabel not found")
 	if multiplier_label:
-		if multiplier > 1:
-			multiplier_label.text = "x%d" % multiplier
-			multiplier_label.visible = true
-			print("InstrumentInfoDisplay: Updated multiplier_label to x%d, visible: true" % multiplier)
-		else:
-			multiplier_label.text = ""
-			multiplier_label.visible = false
-			print("InstrumentInfoDisplay: Cleared multiplier_label, visible: false")
+		multiplier_label.text = "x%d" % multiplier
 	else:
-		push_error("InstrumentInfoDisplay: multiplier_label is null during update")
+		push_warning("InstrumentInfoDisplay: MultiplierLabel not found")
+	visible = true

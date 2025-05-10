@@ -40,7 +40,7 @@ class_name Instrument
 @export_category("Info Display")
 @export var info_display: Control
 @export var display_offset: Vector2 = Vector2(0, 50)
-@export var auto_position_display: bool = false  # Отключено по умолчанию
+@export var auto_position_display: bool = false
 
 ## Настройки комбо
 @export_category("Combo Settings")
@@ -102,138 +102,33 @@ func _ready():
 	
 	# Настройка дисплея
 	if info_display:
-		# Сохраняем позицию из редактора
 		var canvas_layer = get_tree().root.get_node_or_null("InstrumentUILayer")
 		if not canvas_layer:
 			canvas_layer = CanvasLayer.new()
 			canvas_layer.name = "InstrumentUILayer"
 			get_tree().root.add_child(canvas_layer)
 		
-		# Перемещаем info_display в CanvasLayer
+		# Перемещаем info_display в CanvasLayer, сохраняя позицию
 		var old_parent = info_display.get_parent()
-		if old_parent:
+		if old_parent and old_parent != canvas_layer:
 			old_parent.remove_child(info_display)
 		canvas_layer.add_child(info_display)
 		info_display.owner = canvas_layer
 		
-		# Корректируем позицию относительно sprite
-		if sprite:
-			var initial_pos = info_display.position  # Позиция из редактора
-			var sprite_pos = sprite.global_position
-			var viewport = get_viewport()
-			var camera = viewport.get_camera_2d()
-			if camera:
-				sprite_pos = camera.get_screen_position(sprite.global_position)
-			info_display.position = sprite_pos + initial_pos  # Корректируем относительно sprite
-			info_display.visible = true
-			info_display.z_index = 10
-			print("Instrument %s: Using editor position for info_display: %s, size=%s, visible=%s" % [instrument_type, info_display.position, info_display.size, info_display.visible])
-		
-		# Обновляем содержимое дисплея
-		if info_display.has_method("update_display"):
-			info_display.update_display(current_level, current_combo_multiplier)
-		else:
-			# Добавляем метод update_display, если его нет
-			info_display.set_script(GDScript.new())
-			info_display.get_script().source_code = """
-extends Control
-
-var level_label: Label
-var multiplier_label: Label
-
-func _ready():
-	level_label = get_node_or_null("LevelLabel")
-	multiplier_label = get_node_or_null("MultiplierLabel")
-	if level_label:
-		level_label.text = "Lv.0"
-	if multiplier_label:
-		multiplier_label.text = "x1"
-
-func update_display(level: int, multiplier: int):
-	if level_label:
-		level_label.text = "Lv.%d" % level
-	if multiplier_label:
-		multiplier_label.text = "x%d" % multiplier
-	visible = true
-"""
-			info_display.get_script().reload()
-			if info_display.has_method("update_display"):
-				info_display.update_display(current_level, current_combo_multiplier)
-			else:
-				push_warning("Instrument %s: Failed to add update_display method to info_display" % [instrument_type])
-	else:
-		# Если info_display отсутствует, создаем его программно
-		var canvas_layer = get_tree().root.get_node_or_null("InstrumentUILayer")
-		if not canvas_layer:
-			canvas_layer = CanvasLayer.new()
-			canvas_layer.name = "InstrumentUILayer"
-			get_tree().root.add_child(canvas_layer)
-		
-		info_display = Control.new()
-		info_display.name = "InstrumentInfoDisplay"
-		canvas_layer.add_child(info_display)
-		info_display.owner = canvas_layer
-		
-		var panel = PanelContainer.new()
-		info_display.add_child(panel)
-		var vbox = VBoxContainer.new()
-		panel.add_child(vbox)
-		
-		var level_label = Label.new()
-		level_label.name = "LevelLabel"
-		level_label.text = "Lv.%d" % current_level
-		vbox.add_child(level_label)
-		
-		var multiplier_label = Label.new()
-		multiplier_label.name = "MultiplierLabel"
-		multiplier_label.text = "x%d" % current_combo_multiplier
-		vbox.add_child(multiplier_label)
-		
-		# Добавляем метод update_display
-		info_display.set_script(GDScript.new())
-		info_display.get_script().source_code = """
-extends Control
-
-var level_label: Label
-var multiplier_label: Label
-
-func _ready():
-	level_label = get_node_or_null("LevelLabel")
-	multiplier_label = get_node_or_null("MultiplierLabel")
-	if level_label:
-		level_label.text = "Lv.0"
-	if multiplier_label:
-		multiplier_label.text = "x1"
-
-func update_display(level: int, multiplier: int):
-	if level_label:
-		level_label.text = "Lv.%d" % level
-	if multiplier_label:
-		multiplier_label.text = "x%d" % multiplier
-	visible = true
-"""
-		info_display.get_script().reload()
-		
-		if sprite:
-			var sprite_pos = sprite.global_position
-			var viewport = get_viewport()
-			var camera = viewport.get_camera_2d()
-			if camera:
-				sprite_pos = camera.get_screen_position(sprite.global_position)
-			info_display.position = sprite_pos + Vector2(0, sprite.texture.get_height() * sprite.scale.y / 2 + 50)
-		else:
-			info_display.position = Vector2(100, 100)  # Запасная позиция
-		info_display.size = Vector2(150, 60)
-		info_display.visible = true
+		# Сохраняем позицию из сцены
 		info_display.z_index = 10
-		print("Instrument %s: Created info_display at position: %s, size=%s, visible=%s" % [instrument_type, info_display.position, info_display.size, info_display.visible])
+		info_display.visible = true
 		
 		# Обновляем содержимое дисплея
 		if info_display.has_method("update_display"):
 			info_display.update_display(current_level, current_combo_multiplier)
+			print("Instrument %s: Setup display update - Level: %d, Multiplier: %d, Display visible: %s" % [instrument_type, current_level, current_combo_multiplier, info_display.visible])
+		else:
+			push_warning("Instrument %s: info_display lacks update_display method" % [instrument_type])
+	else:
+		push_warning("Instrument %s: No info_display assigned" % [instrument_type])
 
 func _process(_delta: float):
-	# Отключено автопозиционирование
 	pass
 
 ### ======================
@@ -241,20 +136,17 @@ func _process(_delta: float):
 ### ======================
 
 func _load_balance_settings():
-	"""Загрузка настроек баланса из GlobalBalanceManager"""
 	var settings = GlobalBalanceManager.instrument_settings.get(instrument_type, {})
 	_base_points = settings.get("points_per_click", 10)
 	points_per_click = _base_points
 	combo_window_seconds = settings.get("combo_window_seconds", combo_reset_delay)
-	combo_multipliers = Array(settings.get("combo_multipliers", PackedInt32Array([2, 3, 5, 8, 10])))
+	combo_multipliers = Array(settings.get("combo_multipliers", PackedInt32Array([1, 2, 3, 5, 8])))
 	allow_multiple_hits_per_beat = settings.get("allow_multiple_hits", false)
-	# Инициализация _unlocked_sound_indices
 	if sound_pattern.size() > 0:
-		_unlocked_sound_indices.append(0) # Первый звук доступен по умолчанию
-	current_combo_multiplier = combo_multipliers[0] # Устанавливаем начальный множитель
+		_unlocked_sound_indices.append(0)
+	current_combo_multiplier = combo_multipliers[0]
 
 func _initialize_nodes():
-	"""Инициализация и поиск необходимых нод"""
 	if not audio_player:
 		audio_player = AudioStreamPlayer.new()
 		add_child(audio_player)
@@ -270,7 +162,6 @@ func _initialize_nodes():
 	bpm_manager = get_tree().current_scene.get_node("BPM_Manager")
 
 func _initialize_scale():
-	"""Инициализация масштаба с защитой от ошибок"""
 	if not sprite:
 		push_warning("Sprite not found, retrying...")
 		await get_tree().process_frame
@@ -290,7 +181,6 @@ func _initialize_scale():
 	_is_ready = true
 
 func _connect_signals():
-	"""Подключение всех необходимых сигналов"""
 	if bpm_manager:
 		bpm_manager.beat_triggered.connect(_on_beat)
 	
@@ -307,20 +197,18 @@ func _connect_signals():
 ### ======================
 
 func _setup_instrument():
-	"""Первоначальная настройка инструмента"""
 	var gm = get_node_or_null("/root/GameManager")
 	if gm:
 		current_level = gm.get_instrument_level(instrument_type)
 		if current_level >= 1:
 			visible = true
-		_apply_upgrades() # Обновляем комбо и звуки при инициализации
+		_apply_upgrades()
 		
 		if info_display and info_display.has_method("update_display"):
 			info_display.update_display(current_level, current_combo_multiplier)
 			print("Instrument %s: Setup display update - Level: %d, Multiplier: %d, Display visible: %s" % [instrument_type, current_level, current_combo_multiplier, info_display.visible])
 
 func _update_appearance():
-	"""Обновление визуального представления"""
 	var settings = GlobalBalanceManager.get_instrument_level_settings(instrument_type, current_level)
 	
 	if sprite and settings.has("texture") and settings.texture:
@@ -335,12 +223,10 @@ func _update_appearance():
 		print("Instrument %s: Appearance display update - Level: %d, Multiplier: %d, Display visible: %s" % [instrument_type, current_level, current_combo_multiplier, info_display.visible])
 
 func _on_input_event(_viewport, event: InputEvent, _shape_idx):
-	"""Обработка ввода"""
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		_handle_click()
 
 func _handle_click():
-	"""Основная логика обработки клика"""
 	if not _is_ready:
 		return
 	
@@ -384,13 +270,12 @@ func _handle_click():
 ### ======================
 
 func _update_combo(current_time: float):
-	"""Обновление состояния комбо"""
 	var time_since_last_combo = (current_time - last_combo_time) / 1000.0
 	
 	if time_since_last_combo > combo_window_seconds:
 		if combo_count > 0:
 			combo_count = 0
-			current_combo_multiplier = combo_multipliers[0] # Начальный множитель
+			current_combo_multiplier = combo_multipliers[0]
 			_update_info_display()
 			print("Instrument %s: Combo reset - Multiplier: %d" % [instrument_type, current_combo_multiplier])
 		return
@@ -412,7 +297,6 @@ func _update_combo(current_time: float):
 	print("Instrument %s: Combo updated - Count: %d, Multiplier: %d" % [instrument_type, combo_count, current_combo_multiplier])
 
 func _update_info_display():
-	"""Обновление отображения информации"""
 	if info_display and info_display.has_method("update_display"):
 		info_display.update_display(current_level, current_combo_multiplier)
 		print("Instrument %s: Info display update - Level: %d, Multiplier: %d, Display visible: %s" % [instrument_type, current_level, current_combo_multiplier, info_display.visible])
@@ -422,7 +306,6 @@ func _update_info_display():
 ### ======================
 
 func _play_unlock_effect():
-	"""Эффект при разблокировке инструмента"""
 	if not _is_ready or not sprite:
 		return
 	
@@ -435,7 +318,6 @@ func _play_unlock_effect():
 		 .set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
 
 func _play_visual_feedback():
-	"""Визуальный эффект при клике"""
 	if not _is_ready or not sprite or not enable_visual_feedback:
 		return
 	
@@ -445,136 +327,91 @@ func _play_visual_feedback():
 	
 	if feedback_tween:
 		feedback_tween.kill()
-	
 	feedback_tween = create_tween()
-	feedback_tween.tween_property(sprite, "scale", target_scale, feedback_duration * 0.5)\
-				 .set_ease(Tween.EASE_OUT)
-	feedback_tween.tween_property(sprite, "scale", self._base_scale, feedback_duration * 0.5)\
-				 .set_ease(Tween.EASE_IN)
+	feedback_tween.tween_property(sprite, "scale", target_scale, feedback_duration / 2)
+	feedback_tween.tween_property(sprite, "scale", self._base_scale, feedback_duration / 2)
 	
-	_emit_particles(true)
-
-func _emit_particles(_is_in_rhythm: bool):
 	if hit_particles:
-		hit_particles.emitting = true
-	if combo_count >= 3 and combo_particles:
-		combo_particles.emitting = true
-		if combo_colors.size() > 0:
-			var color_idx = min(combo_count - 3, combo_colors.size() - 1)
-			combo_particles.modulate = combo_colors[color_idx]
+		hit_particles.restart()
+	
+	if combo_count > 1 and combo_particles:
+		combo_particles.restart()
 
 ### ======================
-### ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ
+### ЗВУК И ОЧКИ
 ### ======================
 
 func _play_sound(sound: AudioStream):
-	"""Воспроизведение звука"""
-	if audio_player and sound:
+	if sound and audio_player:
 		audio_player.stream = sound
 		audio_player.play()
 
 func _add_points(points: int):
-	"""Добавление очков с визуальным отображением"""
 	var gm = get_node_or_null("/root/GameManager")
-	if gm and gm.has_method("add_score"):
+	if gm:
 		gm.add_score(points)
-		if score_popup_scene:
-			var popup_position = sprite.global_position if sprite else global_position
-			_show_score_popup(points, popup_position)
-
-func _show_score_popup(points: int, popup_pos: Vector2):
-	"""Отображение попапа с очками"""
-	var popup = score_popup_scene.instantiate()
-	get_tree().root.add_child(popup)
-	var color = _get_popup_color()
-	popup.show_score(points, popup_pos, color, current_combo_multiplier)
-
-func _get_popup_color() -> Color:
-	"""Получение цвета для попапа в зависимости от комбо"""
-	if combo_count >= 3 and combo_colors.size() > 0:
-		var color_idx = min(combo_count - 3, combo_colors.size() - 1)
-		return combo_colors[color_idx]
-	return Color.WHITE
-
-func _handle_fail_hit(is_double_hit: bool):
-	"""Обработка неудачного попадания"""
-	combo_count = 0
-	current_combo_multiplier = combo_multipliers[0] # Сбрасываем на начальный множитель
-	_play_fail_sound()
-	_add_points(points_per_click if !is_double_hit else 0)
-	if is_double_hit:
-		_show_combo_reset("Double hit!")
-	_update_info_display()
-	print("Instrument %s: Fail hit - Multiplier reset to: %d" % [instrument_type, current_combo_multiplier])
-
-func _show_combo_reset(message: String):
-	"""Отображение сообщения о сбросе комбо"""
-	var popup_position = sprite.global_position if sprite else global_position
+	
 	if score_popup_scene:
 		var popup = score_popup_scene.instantiate()
-		get_tree().root.add_child(popup)
-		popup.show_score(message, popup_position, Color.RED, 1)
+		if sprite:
+			var viewport = get_viewport()
+			var camera = viewport.get_camera_2d()
+			var popup_pos = sprite.global_position
+			if camera:
+				popup_pos = camera.get_screen_position(sprite.global_position)
+			popup.global_position = popup_pos + Vector2(0, -50)
+		else:
+			popup.global_position = global_position
+		popup.set_points(points)
+		get_tree().current_scene.add_child(popup)
+		print("Instrument %s: ScorePopup created at %s with points %d" % [instrument_type, popup.global_position, points])
 
-func _play_fail_sound():
-	"""Воспроизведение звука ошибки"""
+func _handle_fail_hit(_play_sound: bool):
 	if fail_sound:
 		_play_sound(fail_sound)
+	
+	if combo_enabled:
+		combo_count = 0
+		current_combo_multiplier = combo_multipliers[0]
+		_update_info_display()
 
 ### ======================
-### ОБРАБОТЧИКИ СИГНАЛОВ
+### ОБРАБОТКА СОБЫТИЙ
 ### ======================
 
-func _on_instrument_unlocked(unlocked_type: String):
-	"""Обработка разблокировки инструмента"""
-	if unlocked_type == instrument_type:
+func _on_beat(_beat_number: int):
+	_beat_hit_status.clear()
+
+func _on_instrument_unlocked(_instrument_type: String):
+	if _instrument_type == instrument_type:
 		visible = true
-		_update_appearance()
-		
-		if is_first_unlock:
-			is_first_unlock = false
-			call_deferred("_play_unlock_effect")
+		is_first_unlock = true
+		if _is_ready:
+			_play_unlock_effect()
 
-func _on_instrument_upgraded(upgraded_type: String, level: int):
-	"""Обработка улучшения инструмента"""
-	if upgraded_type == instrument_type:
+func _on_instrument_upgraded(_instrument_type: String, level: int):
+	if _instrument_type == instrument_type:
 		current_level = level
-		_apply_upgrades() # Обновляем комбо и звуки
-		if info_display and info_display.has_method("update_display"):
-			info_display.update_display(current_level, current_combo_multiplier)
-			print("Instrument %s: Upgrade display update - Level: %d, Multiplier: %d, Display visible: %s" % [instrument_type, current_level, current_combo_multiplier, info_display.visible])
-
-func _on_beat(beat_number: int):
-	"""Обработка бита от BPM менеджера"""
-	if sound_pattern.size() > 0:
-		current_pattern_index = beat_number % sound_pattern.size()
+		_update_appearance()
 
 func _apply_upgrades():
-	"""Применение улучшений"""
 	var gm = get_node_or_null("/root/GameManager")
 	if gm:
 		current_level = gm.get_instrument_level(instrument_type)
-		_update_appearance()
+		var settings = GlobalBalanceManager.get_instrument_level_settings(instrument_type, current_level)
+		if settings.has("points"):
+			points_per_click = settings.points
+			_base_points = settings.points
 		
-		# Обновление звуковых паттернов
+		if gm.unlocked_combo_lines.has(instrument_type):
+			_current_combo_pattern = []
+			for i in range(gm.unlocked_combo_lines[instrument_type].size()):
+				if gm.unlocked_combo_lines[instrument_type][i]:
+					_current_combo_pattern.append(i)
+		
 		_unlocked_sound_indices.clear()
-		var combo_lines = gm.unlocked_combo_lines.get(instrument_type, [])
-		if sound_pattern.size() > 1: # Добавляем новые паттерны только если звуков больше одного
-			for i in combo_lines.size():
-				if i < sound_pattern.size() and combo_lines[i]:
-					_unlocked_sound_indices.append(i)
-		if _unlocked_sound_indices.is_empty() and sound_pattern.size() > 0:
-			_unlocked_sound_indices.append(0) # Гарантируем, что хотя бы один звук доступен
+		for i in range(sound_pattern.size()):
+			if i < current_level:
+				_unlocked_sound_indices.append(i)
 		
-		# Обновление множителей комбо
-		var combo_upgrade_id = instrument_type + "_combo"
-		var combo_level = gm.upgrade_levels.get(combo_upgrade_id, 0)
-		var settings = GlobalBalanceManager.upgrades_settings.get(combo_upgrade_id, {})
-		if settings.has("bonus_per_level"):
-			combo_multipliers = settings["bonus_per_level"].slice(0, combo_level + 1)
-		if combo_multipliers.is_empty():
-			combo_multipliers = GlobalBalanceManager.instrument_settings.get(instrument_type, {}).get("combo_multipliers", [2, 3, 5, 8, 10])
-		
-		# Сбрасываем текущий множитель на начальный
-		current_combo_multiplier = combo_multipliers[0]
-		_update_info_display()
-		print("Instrument %s: Apply upgrades - Multipliers: %s, Current Multiplier: %d" % [instrument_type, combo_multipliers, current_combo_multiplier])
+		_update_appearance()

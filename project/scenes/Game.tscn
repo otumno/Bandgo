@@ -200,10 +200,6 @@ offset_bottom = 13.6
 
 [node name="Xylophone" parent="." instance=ExtResource("28_s8cov")]
 visible = false
-sound_pattern = Array[AudioStream]([])
-first_click_sound = null
-fail_sound = null
-input_keys = Array[AudioStream]([])
 score_popup_scene = null
 
 [node name="Sprite2D2" type="Sprite2D" parent="Xylophone"]
@@ -213,12 +209,7 @@ texture = ExtResource("13_n55ws")
 
 [node name="Tomtom" parent="." instance=ExtResource("29_sbvte")]
 visible = false
-sound_pattern = Array[AudioStream]([])
-first_click_sound = null
-fail_sound = null
-input_keys = Array[AudioStream]([])
 score_popup_scene = null
-display_offset = Vector2(0, 50)
 
 [node name="Sprite2D2" type="Sprite2D" parent="Tomtom"]
 position = Vector2(1182, 1050)
@@ -227,16 +218,8 @@ texture = ExtResource("13_n55ws")
 
 [node name="Pata" parent="." instance=ExtResource("30_3kfp1")]
 visible = false
-sound_pattern = Array[AudioStream]([])
-first_click_sound = null
-fail_sound = null
 score_popup_scene = null
 
 [node name="Pon" parent="." instance=ExtResource("31_i1c61")]
 visible = false
-sound_pattern = Array[AudioStream]([])
-first_click_sound = null
-fail_sound = null
-input_keys = Array[AudioStream]([])
 score_popup_scene = null
-display_offset = Vector2(0, 50)

@@ -1,22 +1,22 @@
 extends Node2D
 
 @onready var label: Label = $Label
-@export var rise_distance: float = 50.0
-@export var duration: float = 0.8
+var points: int = 0
 
-func show_score(value: Variant, popup_position: Vector2, color: Color, _multiplier: int = 1):
-	# Переименовали параметр position в popup_position, чтобы избежать конфликта с position из Node2D
-	global_position = popup_position
-	
-	if value is int or value is float:
-		label.text = "+%d" % value
+func _ready():
+	if label:
+		label.text = "+%d" % points
+		# Устанавливаем размер шрифта через override
+		label.add_theme_font_size_override("font_size", 40)
+		var tween = create_tween()
+		tween.tween_property(self, "position", position + Vector2(0, -50), 0.5)
+		tween.tween_property(self, "modulate:a", 0.0, 0.5)
+		tween.tween_callback(queue_free)
 	else:
-		label.text = str(value)
-	
-	label.modulate = color
-	
-	var tween = create_tween()
-	tween.tween_property(self, "position", popup_position + Vector2(0, -rise_distance), duration)
-	tween.parallel().tween_property(label, "scale", Vector2(1.2, 1.2), duration * 0.3)
-	tween.tween_property(label, "scale", Vector2.ONE, duration * 0.5)
-	tween.tween_callback(queue_free)
+		push_warning("ScorePopup: Label not found")
+		queue_free()
+
+func set_points(value: int):
+	points = value
+	if label:
+		label.text = "+%d" % points
