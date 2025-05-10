@@ -1,8 +1,6 @@
-[gd_scene load_steps=8 format=3 uid="uid://cnxt0hd28011t"]
+[gd_scene load_steps=6 format=3 uid="uid://cnxt0hd28011t"]
 
 [ext_resource type="Script" uid="uid://cyi4htwqahhjt" path="res://project/scripts/Instrument.gd" id="1_vlbhs"]
-[ext_resource type="AudioStream" uid="uid://b8obbfx45w55r" path="res://project/assets/sounds/Barrel_Tom.ogg" id="2_mwwht"]
-[ext_resource type="AudioStream" uid="uid://d1ybuhfyh30af" path="res://project/assets/sounds/Pata/pon-drum_YpFMJmj.mp3" id="3_gfjm7"]
 [ext_resource type="Texture2D" uid="uid://b7nlbr70vc8v2" path="res://project/assets/textures/Tom1.png" id="5_mwwht"]
 [ext_resource type="PackedScene" uid="uid://2mpj0r5wd4rl" path="res://project/scenes/InstrumentInfoDisplay.tscn" id="6_ua6pb"]
 [ext_resource type="PackedScene" uid="uid://cxu2mdfufhifo" path="res://project/scenes/ScorePopup.tscn" id="7_oavo0"]
@@ -10,16 +8,10 @@
 [sub_resource type="CircleShape2D" id="CircleShape2D_mmrgp"]
 radius = 110.0
 
-[node name="Pon" type="Area2D" node_paths=PackedStringArray("info_display")]
+[node name="Pon" type="Area2D"]
 script = ExtResource("1_vlbhs")
-sound_pattern = Array[AudioStream]([ExtResource("2_mwwht")])
-first_click_sound = ExtResource("3_gfjm7")
-fail_sound = ExtResource("3_gfjm7")
 instrument_type = "pon"
-input_keys = Array[String](["d"])
 score_popup_scene = ExtResource("7_oavo0")
-info_display = NodePath("InfoDisplay")
-display_offset = Vector2(0, 0)
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 position = Vector2(1701, 991)
@@ -33,7 +25,7 @@ shape = SubResource("CircleShape2D_mmrgp")
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
 
 [node name="InfoDisplay" parent="." instance=ExtResource("6_ua6pb")]
-offset_left = 1506.0
-offset_top = 770.0
-offset_right = 1506.0
-offset_bottom = 770.0
+offset_left = 1585.0
+offset_top = 764.0
+offset_right = 1585.0
+offset_bottom = 764.0

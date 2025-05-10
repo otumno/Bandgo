@@ -40,7 +40,7 @@ class_name Instrument
 @export_category("Info Display")
 @export var info_display: Control
 @export var display_offset: Vector2 = Vector2(0, 50)
-@export var auto_position_display: bool = true
+@export var auto_position_display: bool = false  # Отключено по умолчанию
 
 ## Настройки комбо
 @export_category("Combo Settings")
@@ -100,23 +100,141 @@ func _ready():
 	call_deferred("_initialize_scale")
 	add_to_group("instruments")
 	
+	# Настройка дисплея
 	if info_display:
+		# Сохраняем позицию из редактора
+		var canvas_layer = get_tree().root.get_node_or_null("InstrumentUILayer")
+		if not canvas_layer:
+			canvas_layer = CanvasLayer.new()
+			canvas_layer.name = "InstrumentUILayer"
+			get_tree().root.add_child(canvas_layer)
+		
+		# Перемещаем info_display в CanvasLayer
+		var old_parent = info_display.get_parent()
+		if old_parent:
+			old_parent.remove_child(info_display)
+		canvas_layer.add_child(info_display)
+		info_display.owner = canvas_layer
+		
+		# Корректируем позицию относительно sprite
+		if sprite:
+			var initial_pos = info_display.position  # Позиция из редактора
+			var sprite_pos = sprite.global_position
+			var viewport = get_viewport()
+			var camera = viewport.get_camera_2d()
+			if camera:
+				sprite_pos = camera.get_screen_position(sprite.global_position)
+			info_display.position = sprite_pos + initial_pos  # Корректируем относительно sprite
+			info_display.visible = true
+			info_display.z_index = 10
+			print("Instrument %s: Using editor position for info_display: %s, size=%s, visible=%s" % [instrument_type, info_display.position, info_display.size, info_display.visible])
+		
+		# Обновляем содержимое дисплея
 		if info_display.has_method("update_display"):
 			info_display.update_display(current_level, current_combo_multiplier)
-			print("Instrument %s: Initial display update - Level: %d, Multiplier: %d, Display visible: %s" % [instrument_type, current_level, current_combo_multiplier, info_display.visible])
 		else:
-			push_warning("Instrument %s: InfoDisplay missing update_display() method" % instrument_type)
+			# Добавляем метод update_display, если его нет
+			info_display.set_script(GDScript.new())
+			info_display.get_script().source_code = """
+extends Control
+
+var level_label: Label
+var multiplier_label: Label
+
+func _ready():
+	level_label = get_node_or_null("LevelLabel")
+	multiplier_label = get_node_or_null("MultiplierLabel")
+	if level_label:
+		level_label.text = "Lv.0"
+	if multiplier_label:
+		multiplier_label.text = "x1"
+
+func update_display(level: int, multiplier: int):
+	if level_label:
+		level_label.text = "Lv.%d" % level
+	if multiplier_label:
+		multiplier_label.text = "x%d" % multiplier
+	visible = true
+"""
+			info_display.get_script().reload()
+			if info_display.has_method("update_display"):
+				info_display.update_display(current_level, current_combo_multiplier)
+			else:
+				push_warning("Instrument %s: Failed to add update_display method to info_display" % [instrument_type])
 	else:
-		push_warning("Instrument %s: info_display is null" % instrument_type)
+		# Если info_display отсутствует, создаем его программно
+		var canvas_layer = get_tree().root.get_node_or_null("InstrumentUILayer")
+		if not canvas_layer:
+			canvas_layer = CanvasLayer.new()
+			canvas_layer.name = "InstrumentUILayer"
+			get_tree().root.add_child(canvas_layer)
+		
+		info_display = Control.new()
+		info_display.name = "InstrumentInfoDisplay"
+		canvas_layer.add_child(info_display)
+		info_display.owner = canvas_layer
+		
+		var panel = PanelContainer.new()
+		info_display.add_child(panel)
+		var vbox = VBoxContainer.new()
+		panel.add_child(vbox)
+		
+		var level_label = Label.new()
+		level_label.name = "LevelLabel"
+		level_label.text = "Lv.%d" % current_level
+		vbox.add_child(level_label)
+		
+		var multiplier_label = Label.new()
+		multiplier_label.name = "MultiplierLabel"
+		multiplier_label.text = "x%d" % current_combo_multiplier
+		vbox.add_child(multiplier_label)
+		
+		# Добавляем метод update_display
+		info_display.set_script(GDScript.new())
+		info_display.get_script().source_code = """
+extends Control
+
+var level_label: Label
+var multiplier_label: Label
+
+func _ready():
+	level_label = get_node_or_null("LevelLabel")
+	multiplier_label = get_node_or_null("MultiplierLabel")
+	if level_label:
+		level_label.text = "Lv.0"
+	if multiplier_label:
+		multiplier_label.text = "x1"
+
+func update_display(level: int, multiplier: int):
+	if level_label:
+		level_label.text = "Lv.%d" % level
+	if multiplier_label:
+		multiplier_label.text = "x%d" % multiplier
+	visible = true
+"""
+		info_display.get_script().reload()
+		
+		if sprite:
+			var sprite_pos = sprite.global_position
+			var viewport = get_viewport()
+			var camera = viewport.get_camera_2d()
+			if camera:
+				sprite_pos = camera.get_screen_position(sprite.global_position)
+			info_display.position = sprite_pos + Vector2(0, sprite.texture.get_height() * sprite.scale.y / 2 + 50)
+		else:
+			info_display.position = Vector2(100, 100)  # Запасная позиция
+		info_display.size = Vector2(150, 60)
+		info_display.visible = true
+		info_display.z_index = 10
+		print("Instrument %s: Created info_display at position: %s, size=%s, visible=%s" % [instrument_type, info_display.position, info_display.size, info_display.visible])
+		
+		# Обновляем содержимое дисплея
+		if info_display.has_method("update_display"):
+			info_display.update_display(current_level, current_combo_multiplier)
 
 func _process(_delta: float):
-	if auto_position_display and info_display and sprite and _is_ready:
-		var sprite_bottom = sprite.global_position.y + sprite.texture.get_height() * sprite.scale.y
-		info_display.global_position.x = sprite.global_position.x + sprite.texture.get_width() * sprite.scale.x / 2 - info_display.size.x / 2
-		info_display.global_position.y = sprite_bottom + display_offset.y
-		if not info_display.visible:
-			info_display.visible = true
-			print("Instrument %s: Forced info_display visible in _process" % instrument_type)
+	# Отключено автопозиционирование
+	pass
 
 ### ======================
 ### МЕТОДЫ ИНИЦИАЛИЗАЦИИ

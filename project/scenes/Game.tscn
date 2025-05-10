@@ -1,4 +1,4 @@
-[gd_scene load_steps=34 format=3 uid="uid://crxvqga1dtvbn"]
+[gd_scene load_steps=26 format=3 uid="uid://crxvqga1dtvbn"]
 
 [ext_resource type="Script" uid="uid://chnxutp3hdm6t" path="res://project/scripts/SceneAudioHandler.gd" id="1_cqeua"]
 [ext_resource type="Texture2D" uid="uid://cbweq7e7c7pcd" path="res://project/assets/textures/6f018d8a158211f0a4402e814483879f_1.jpg" id="1_kgxh5"]
@@ -10,18 +10,11 @@
 [ext_resource type="Script" uid="uid://c75nob438sph0" path="res://project/scripts/BPM_Manager.gd" id="7_f3117"]
 [ext_resource type="Script" uid="uid://cyi4htwqahhjt" path="res://project/scripts/Instrument.gd" id="10_mvo24"]
 [ext_resource type="Texture2D" uid="uid://cx4cbbkkni0bj" path="res://project/assets/textures/Shadow.png" id="13_n55ws"]
-[ext_resource type="AudioStream" uid="uid://1sgsdhge4w7g" path="res://project/assets/sounds/xylophon_1.ogg" id="14_lpm4y"]
-[ext_resource type="AudioStream" uid="uid://b8obbfx45w55r" path="res://project/assets/sounds/Barrel_Tom.ogg" id="14_nooqs"]
 [ext_resource type="Script" uid="uid://df1wy3kgm5iwy" path="res://project/scripts/PlayerUI.gd" id="14_qo2pe"]
-[ext_resource type="AudioStream" uid="uid://cexwuu2jf8lbn" path="res://project/assets/sounds/Barrel_Fail.ogg" id="15_ftep8"]
 [ext_resource type="Script" uid="uid://cckliyyl5npbh" path="res://project/scripts/BPM_SpritePulser.gd" id="15_nooqs"]
-[ext_resource type="AudioStream" uid="uid://dgpfnx58hv8hk" path="res://project/assets/sounds/xylophon_2.ogg" id="15_qlf8t"]
 [ext_resource type="Texture2D" uid="uid://bwobsrgdgjyrg" path="res://project/assets/textures/FRAME_1.png" id="16_ftep8"]
-[ext_resource type="AudioStream" uid="uid://dlk4cmhqva4db" path="res://project/assets/sounds/xylophon_3.ogg" id="16_n55ws"]
 [ext_resource type="Texture2D" uid="uid://dv6pg3jv73gwi" path="res://project/assets/textures/FRAME_2.png" id="17_27fkg"]
-[ext_resource type="AudioStream" uid="uid://clnxb7pknphow" path="res://project/assets/sounds/xylophon_4.ogg" id="17_rbt3f"]
 [ext_resource type="Texture2D" uid="uid://b77702pbc12b3" path="res://project/assets/textures/Xylophone.png" id="19_qlf8t"]
-[ext_resource type="PackedScene" uid="uid://cxu2mdfufhifo" path="res://project/scenes/ScorePopup.tscn" id="19_rbt3f"]
 [ext_resource type="AudioStream" uid="uid://cwv6euhypeclj" path="res://project/assets/sounds/Pata/Hay1.mp3" id="23_3kfp1"]
 [ext_resource type="AudioStream" uid="uid://duudovo1yobfm" path="res://project/assets/sounds/Pata/Hay2.mp3" id="24_i1c61"]
 [ext_resource type="Texture2D" uid="uid://b7nlbr70vc8v2" path="res://project/assets/textures/Tom1.png" id="24_n55ws"]
@@ -30,7 +23,6 @@
 [ext_resource type="PackedScene" uid="uid://6mtbhdt45dg6" path="res://project/scenes/Instruments/tomtom.tscn" id="29_sbvte"]
 [ext_resource type="PackedScene" uid="uid://d13po65stxlat" path="res://project/scenes/Instruments/pata.tscn" id="30_3kfp1"]
 [ext_resource type="PackedScene" uid="uid://cnxt0hd28011t" path="res://project/scenes/Instruments/pon.tscn" id="31_i1c61"]
-[ext_resource type="AudioStream" uid="uid://d1ybuhfyh30af" path="res://project/assets/sounds/Pata/pon-drum_YpFMJmj.mp3" id="32_i1c61"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_f3117"]
 size = Vector2(519.804, 113)
@@ -90,11 +82,7 @@ metadata/_edit_use_anchors_ = true
 [node name="Instrument_Xylo" type="Area2D" parent="."]
 visible = false
 script = ExtResource("10_mvo24")
-sound_pattern = Array[AudioStream]([ExtResource("14_lpm4y"), ExtResource("15_qlf8t"), ExtResource("16_n55ws"), ExtResource("17_rbt3f")])
-first_click_sound = ExtResource("14_lpm4y")
-fail_sound = ExtResource("15_ftep8")
 instrument_type = "xylophone"
-score_popup_scene = ExtResource("19_rbt3f")
 
 [node name="Sprite2D" type="Sprite2D" parent="Instrument_Xylo"]
 position = Vector2(754, 934)
@@ -111,10 +99,6 @@ shape = SubResource("RectangleShape2D_f3117")
 [node name="Instrument_Tom" type="Area2D" parent="."]
 visible = false
 script = ExtResource("10_mvo24")
-sound_pattern = Array[AudioStream]([ExtResource("14_nooqs")])
-first_click_sound = ExtResource("14_nooqs")
-fail_sound = ExtResource("15_ftep8")
-score_popup_scene = ExtResource("19_rbt3f")
 
 [node name="Sprite2D" type="Sprite2D" parent="Instrument_Tom"]
 position = Vector2(1173, 935)
@@ -216,8 +200,11 @@ offset_bottom = 13.6
 
 [node name="Xylophone" parent="." instance=ExtResource("28_s8cov")]
 visible = false
-input_keys = Array[String]([])
-combo_colors = Array[Color]([Color(1, 0.843137, 0, 1), Color(0.862745, 0.0784314, 0.235294, 1), Color(0, 0.74902, 1, 1)])
+sound_pattern = Array[AudioStream]([])
+first_click_sound = null
+fail_sound = null
+input_keys = Array[AudioStream]([])
+score_popup_scene = null
 
 [node name="Sprite2D2" type="Sprite2D" parent="Xylophone"]
 position = Vector2(760, 1051)
@@ -226,7 +213,11 @@ texture = ExtResource("13_n55ws")
 
 [node name="Tomtom" parent="." instance=ExtResource("29_sbvte")]
 visible = false
-input_keys = Array[String]([])
+sound_pattern = Array[AudioStream]([])
+first_click_sound = null
+fail_sound = null
+input_keys = Array[AudioStream]([])
+score_popup_scene = null
 display_offset = Vector2(0, 50)
 
 [node name="Sprite2D2" type="Sprite2D" parent="Tomtom"]
@@ -236,9 +227,16 @@ texture = ExtResource("13_n55ws")
 
 [node name="Pata" parent="." instance=ExtResource("30_3kfp1")]
 visible = false
+sound_pattern = Array[AudioStream]([])
+first_click_sound = null
+fail_sound = null
+score_popup_scene = null
 
 [node name="Pon" parent="." instance=ExtResource("31_i1c61")]
 visible = false
-sound_pattern = Array[AudioStream]([ExtResource("32_i1c61")])
-input_keys = Array[String]([])
+sound_pattern = Array[AudioStream]([])
+first_click_sound = null
+fail_sound = null
+input_keys = Array[AudioStream]([])
+score_popup_scene = null
 display_offset = Vector2(0, 50)

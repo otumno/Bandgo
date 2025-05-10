@@ -5,16 +5,19 @@
 [ext_resource type="FontFile" uid="uid://incgx0y42xki" path="res://project/Fonts/TOYZ.otf" id="3_imorw"]
 
 [node name="InstrumentInfoDisplay" type="Control"]
+custom_minimum_size = Vector2(300, 100)
 layout_mode = 3
 anchors_preset = 0
 script = ExtResource("1_3r5n2")
 
 [node name="PanelContainer" type="PanelContainer" parent="."]
+custom_minimum_size = Vector2(300, 100)
 layout_mode = 0
 offset_right = 200.0
 offset_bottom = 80.0
 
 [node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer"]
+custom_minimum_size = Vector2(300, 100)
 layout_mode = 2
 
 [node name="LevelLabel" type="Label" parent="PanelContainer/HBoxContainer"]

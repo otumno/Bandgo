@@ -1,11 +1,6 @@
-[gd_scene load_steps=11 format=3 uid="uid://b26bqkmk3hi5o"]
+[gd_scene load_steps=6 format=3 uid="uid://b26bqkmk3hi5o"]
 
 [ext_resource type="Script" uid="uid://cyi4htwqahhjt" path="res://project/scripts/Instrument.gd" id="1_vlbhs"]
-[ext_resource type="AudioStream" uid="uid://1sgsdhge4w7g" path="res://project/assets/sounds/xylophon_1.ogg" id="2_eoq7y"]
-[ext_resource type="AudioStream" uid="uid://dgpfnx58hv8hk" path="res://project/assets/sounds/xylophon_2.ogg" id="3_7vrhm"]
-[ext_resource type="AudioStream" uid="uid://dlk4cmhqva4db" path="res://project/assets/sounds/xylophon_3.ogg" id="4_0yqa7"]
-[ext_resource type="AudioStream" uid="uid://clnxb7pknphow" path="res://project/assets/sounds/xylophon_4.ogg" id="5_h3h0p"]
-[ext_resource type="AudioStream" uid="uid://dxmcutit8pbbu" path="res://project/assets/sounds/xylophon_Fail.ogg" id="6_x8ecp"]
 [ext_resource type="PackedScene" uid="uid://cxu2mdfufhifo" path="res://project/scenes/ScorePopup.tscn" id="7_oavo0"]
 [ext_resource type="Texture2D" uid="uid://b77702pbc12b3" path="res://project/assets/textures/Xylophone.png" id="8_6jyws"]
 [ext_resource type="PackedScene" uid="uid://2mpj0r5wd4rl" path="res://project/scenes/InstrumentInfoDisplay.tscn" id="9_eoq7y"]
@@ -15,11 +10,7 @@ size = Vector2(519.804, 113)
 
 [node name="Xylophone" type="Area2D"]
 script = ExtResource("1_vlbhs")
-sound_pattern = Array[AudioStream]([ExtResource("2_eoq7y"), ExtResource("3_7vrhm"), ExtResource("4_0yqa7"), ExtResource("5_h3h0p")])
-first_click_sound = ExtResource("4_0yqa7")
-fail_sound = ExtResource("6_x8ecp")
 instrument_type = "xylophone"
-input_keys = Array[String](["a"])
 score_popup_scene = ExtResource("7_oavo0")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
@@ -34,8 +25,10 @@ shape = SubResource("RectangleShape2D_w62g7")
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
 
-[node name="InfoDisplay" parent="." instance=ExtResource("9_eoq7y")]
-offset_left = 543.0
-offset_top = 716.0
-offset_right = 543.0
-offset_bottom = 716.0
+[node name="UILayer" type="CanvasLayer" parent="."]
+
+[node name="InfoDisplay" parent="UILayer" instance=ExtResource("9_eoq7y")]
+offset_left = 574.0
+offset_top = 701.0
+offset_right = 874.0
+offset_bottom = 801.0
