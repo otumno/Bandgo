@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://cp0b23v5aeccl"]
+[gd_scene load_steps=4 format=3 uid="uid://cp0b23v5aeccl"]
 
 [ext_resource type="Script" uid="uid://dr1ejrtgvd4bx" path="res://project/scripts/UpgradeButton.gd" id="1_etlfq"]
 [ext_resource type="Theme" uid="uid://3pqwyww8rrpc" path="res://project/themes/new_theme.tres" id="2_rv0cg"]
+[ext_resource type="FontFile" uid="uid://incgx0y42xki" path="res://project/Fonts/TOYZ.otf" id="3_ey3af"]
 
 [node name="UpgradeButton" type="Button"]
 custom_minimum_size = Vector2(200, 190)
@@ -22,38 +23,37 @@ layout_mode = 2
 alignment = 1
 
 [node name="NameLabel" type="Label" parent="HBoxContainer/VBoxContainer"]
-unique_name_in_owner = true
 custom_minimum_size = Vector2(170, 0)
 layout_mode = 2
 size_flags_vertical = 7
 theme = ExtResource("2_rv0cg")
+theme_override_fonts/font = ExtResource("3_ey3af")
 theme_override_font_sizes/font_size = 25
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 3
 
 [node name="LevelLabel" type="Label" parent="HBoxContainer/VBoxContainer"]
-unique_name_in_owner = true
 custom_minimum_size = Vector2(170, 0)
 layout_mode = 2
 size_flags_vertical = 7
 theme = ExtResource("2_rv0cg")
+theme_override_fonts/font = ExtResource("3_ey3af")
 theme_override_font_sizes/font_size = 21
 horizontal_alignment = 1
 
 [node name="CostLabel" type="Label" parent="HBoxContainer/VBoxContainer"]
-unique_name_in_owner = true
 custom_minimum_size = Vector2(170, 0)
 layout_mode = 2
 size_flags_vertical = 7
 theme = ExtResource("2_rv0cg")
+theme_override_fonts/font = ExtResource("3_ey3af")
 theme_override_font_sizes/font_size = 36
 horizontal_alignment = 1
 vertical_alignment = 1
 uppercase = true
 
 [node name="LockOverlay" type="ColorRect" parent="HBoxContainer"]
-unique_name_in_owner = true
 layout_mode = 2
 mouse_filter = 2
 color = Color(0.54902, 0, 0, 0.439216)

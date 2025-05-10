@@ -8,149 +8,77 @@ extends Panel
 
 var upgrade_button_scene = preload("res://project/scenes/UpgradeButton.tscn")
 
-const BUTTON_MARGIN := 10
-const SECTION_HEADER_MARGIN := 20
+# Настройки размера кнопок
+const BUTTON_WIDTH := 300
+const BUTTON_HEIGHT := 120
+const BUTTON_MARGIN := 15
 
 func _ready():
-	# Инициализация GameManager
-	var gm = get_node_or_null("/root/GameManager")
-	if not gm:
-		push_error("GameManager not found!")
-		return
-	
 	# Настройка контейнера
-	if not upgrades_container:
-		upgrades_container = HBoxContainer.new()
-		scroll_container.add_child(upgrades_container)
-	
+	upgrades_container.custom_minimum_size.y = BUTTON_HEIGHT + 20
 	upgrades_container.add_theme_constant_override("separation", BUTTON_MARGIN)
+	
 	close_button.pressed.connect(hide)
-	gm.upgrades_updated.connect(update_upgrades_list)
+	GameManager.upgrades_updated.connect(update_upgrades_list)
 	update_upgrades_list()
 
 func update_upgrades_list():
-	# Очистка только кнопок (сохраняем заголовки)
+	# Очистка старых кнопок
 	for child in upgrades_container.get_children():
-		if not (child is Label or child.get_class() == "Control"):
-			child.queue_free()
+		child.queue_free()
 	
-	await get_tree().process_frame
+	await get_tree().process_frame  # Ждем завершения очистки
 	
-	# Создаем разделы
-	_add_section_header("Unlock Instruments")
-	_create_unlock_buttons()
+	# Отладочный вывод данных
+	print("Available upgrades: ", GlobalBalanceManager.upgrades_settings)
 	
-	_add_section_header("Upgrade Instruments")
-	for instrument in GameManager.unlocked_instruments:
-		_create_instrument_upgrades(instrument)
-	
-	_add_section_header("Global Upgrades")
-	_create_global_upgrades()
-
-func _add_section_header(title: String):
-	var header = Label.new()
-	header.text = title
-	header.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	header.add_theme_font_size_override("font_size", 20)
-	header.add_theme_color_override("font_color", Color.GOLDENROD)
-	upgrades_container.add_child(header)
-	
-	var margin = Control.new()
-	margin.custom_minimum_size.y = SECTION_HEADER_MARGIN
-	upgrades_container.add_child(margin)
-
-func _create_unlock_buttons():
-	for inst_type in GlobalBalanceManager.initial_instruments:
-		if not GameManager.unlocked_instruments.has(inst_type):
-			var settings = GlobalBalanceManager.initial_instruments[inst_type]
+	# Создаем новые кнопки
+	for upgrade_id in GlobalBalanceManager.upgrades_settings:
+		var settings = GlobalBalanceManager.upgrades_settings[upgrade_id]
+		var current_level = GameManager.upgrade_levels.get(upgrade_id, 0)
+		print("Processing upgrade_id: ", upgrade_id, " | settings: ", settings, " | current_level: ", current_level)
+		
+		if current_level < settings["cost_per_level"].size():
 			var button = upgrade_button_scene.instantiate()
 			
-			button.setup(
-				inst_type + "_unlock",
-				{
-					"name": "Unlock " + settings["display_name"],
-					"cost_per_level": [settings["initial_cost"]],
-					"bonus_per_level": [1]
-				},
-				0
-			)
-			button.pressed.connect(_on_upgrade_pressed.bind(inst_type + "_unlock"))
+			# Настройка размера и положения
+			button.custom_minimum_size = Vector2(BUTTON_WIDTH, BUTTON_HEIGHT)
+			button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+			
 			upgrades_container.add_child(button)
-
-func _create_instrument_upgrades(instrument: String):
-	var current_level = GameManager.get_instrument_level(instrument)
-	
-	# Улучшение уровня инструмента
-	if current_level < GlobalBalanceManager.get_max_instrument_level(instrument):
-		var button = upgrade_button_scene.instantiate()
-		button.setup(
-			instrument + "_unlock",
-			GlobalBalanceManager.upgrades_settings.get(instrument + "_unlock", {}),
-			current_level
-		)
-		button.pressed.connect(_on_upgrade_pressed.bind(instrument + "_unlock"))
-		upgrades_container.add_child(button)
-	
-	# Улучшение комбо
-	var combo_level = GameManager.upgrade_levels.get(instrument + "_combo", 0)
-	if combo_level < 5:  # Максимум 5 уровней комбо
-		var button = upgrade_button_scene.instantiate()
-		button.setup(
-			instrument + "_combo",
-			{
-				"name": instrument.capitalize() + " Combo",
-				"cost_per_level": [500, 1000, 2000, 4000, 8000],
-				"bonus_per_level": [2, 4, 6, 8, 10]
-			},
-			combo_level
-		)
-		button.pressed.connect(_on_upgrade_pressed.bind(instrument + "_combo"))
-		upgrades_container.add_child(button)
-
-func _create_global_upgrades():
-	for upgrade_id in GlobalBalanceManager.global_upgrades:
-		var current_level = GameManager.upgrade_levels.get(upgrade_id, 0)
-		if current_level < GlobalBalanceManager.global_upgrades[upgrade_id]["cost_per_level"].size():
-			var button = upgrade_button_scene.instantiate()
-			button.setup(
-				upgrade_id,
-				GlobalBalanceManager.global_upgrades[upgrade_id],
-				current_level
-			)
-			button.pressed.connect(_on_upgrade_pressed.bind(upgrade_id))
-			upgrades_container.add_child(button)
+			
+			# Небольшая задержка для инициализации
+			await get_tree().process_frame
+			
+			# Проверяем наличие метода setup
+			if button.has_method("setup"):
+				button.setup(upgrade_id, settings, current_level)
+				button.pressed.connect(_on_upgrade_pressed.bind(upgrade_id))
+				print("Setup called for upgrade_id: ", upgrade_id, " with name: ", settings.get("name", "Unknown"))
+			else:
+				# Вызываем напрямую как обходной путь
+				print("WARNING: has_method('setup') returned false for ", upgrade_id)
+				button.setup(upgrade_id, settings, current_level)
+				button.pressed.connect(_on_upgrade_pressed.bind(upgrade_id))
+				print("Setup called directly for upgrade_id: ", upgrade_id, " with name: ", settings.get("name", "Unknown"))
 
 func _on_upgrade_pressed(upgrade_id: String):
-	var gm = get_node_or_null("/root/GameManager")
-	if not gm:
-		error_sound.play()
-		return
-	
-	var settings: Dictionary
-	if upgrade_id in GlobalBalanceManager.global_upgrades:
-		settings = GlobalBalanceManager.global_upgrades[upgrade_id]
-	elif upgrade_id.ends_with("_combo"):
-		settings = {
-			"cost_per_level": [500, 1000, 2000, 4000, 8000],
-			"bonus_per_level": [2, 4, 6, 8, 10]
-		}
-	else:
-		settings = GlobalBalanceManager.upgrades_settings.get(upgrade_id, {})
-	
-	var current_level = gm.upgrade_levels.get(upgrade_id, 0)
+	var settings = GlobalBalanceManager.upgrades_settings.get(upgrade_id, {})
+	var current_level = GameManager.upgrade_levels.get(upgrade_id, 0)
 	var costs = settings.get("cost_per_level", [])
 	
 	if current_level >= costs.size():
-		error_sound.play()
 		return
 	
-	if gm.upgrade(upgrade_id, costs[current_level]):
+	var cost = costs[current_level]
+	
+	if GameManager.upgrade(upgrade_id, cost):
 		purchase_sound.play()
 	else:
 		error_sound.play()
-		_animate_error_feedback()
+		animate_error()
 
-func _animate_error_feedback():
-	var tween = create_tween()
-	tween.tween_property(self, "modulate", Color(1, 0.5, 0.5), 0.1)
-	tween.tween_property(self, "modulate", Color.WHITE, 0.4)
+func animate_error():
+	var tween = create_tween().set_parallel(true)
+	tween.tween_property(self, "modulate", Color.RED, 0.1)
+	tween.tween_property(self, "modulate", Color.WHITE, 0.3)
