@@ -1,5 +1,4 @@
 extends Node
-# Главный менеджер игры (автозагружается как синглтон)
 
 signal score_updated(new_score)
 signal player_name_updated(new_name)
@@ -7,7 +6,6 @@ signal upgrades_updated()
 signal instrument_unlocked(instrument_type: String)
 signal instrument_upgraded(instrument_type: String, level: int)
 
-# Основные игровые переменные
 var player_name: String = "Player":
 	set(value):
 		if value != player_name:
@@ -20,31 +18,28 @@ var score: int = 0:
 			score = value
 			emit_signal("score_updated", value)
 
-# Система слотов сохранения
 var current_slot: int = 1:
 	set(value):
 		if current_slot != value:
-			SaveSystem.save_game(current_slot)  # Сохраняем текущий слот
+			SaveSystem.save_game(current_slot)
 			current_slot = value
-			if not SaveSystem.load_game(current_slot):  # Загружаем новый
+			if not SaveSystem.load_game(current_slot):
 				reset()
 
-# Коллекции игровых данных
-var unlocked_instruments: Array[String] = []       # Разблокированные инструменты
-var upgrade_levels: Dictionary = {}                # Уровни улучшений (например, {"xylophone_unlock": 2})
-var unlocked_combo_lines: Dictionary = {}          # Открытые паттерны (например, {"xylophone": 3})
+var unlocked_instruments: Array[String] = []
+var upgrade_levels: Dictionary = {}
+var unlocked_combo_lines: Dictionary = {}
 
 func _ready():
-		# Загрузка сохранений при старте
 	if not SaveSystem.load_game(current_slot):
-		# Инициализация первого инструмента
 		unlocked_instruments.append("xylophone")
+		upgrade_levels["xylophone_unlock"] = 1 # Устанавливаем начальный уровень
+		unlocked_combo_lines["xylophone"] = [true] # Начальный паттерн для ксилофона
 		upgrades_updated.emit()
 	
 	load_default_settings()
 	print("GameManager initialized for slot ", current_slot)
 
-# Сброс к начальным настройкам
 func load_default_settings():
 	player_name = "Player"
 	score = 0
@@ -59,7 +54,6 @@ func reset():
 	emit_signal("upgrades_updated")
 	print("Game state reset")
 
-# Добавление очков с учетом множителей
 func add_score(points: int):
 	if points <= 0:
 		return
@@ -73,14 +67,12 @@ func add_score(points: int):
 	emit_signal("score_updated", score)
 	print("Added score: ", final_points, " (base: ", points, " multiplier: ", multiplier, ")")
 
-# Получение уровня инструмента
 func get_instrument_level(instrument_type: String) -> int:
 	if instrument_type.is_empty():
 		push_error("Empty instrument_type!")
 		return 0
 	return upgrade_levels.get(instrument_type + "_unlock", 0)
 
-# Основная функция улучшений
 func upgrade(upgrade_id: String, cost: int) -> bool:
 	if upgrade_id.is_empty():
 		push_error("Empty upgrade_id!")
@@ -90,7 +82,6 @@ func upgrade(upgrade_id: String, cost: int) -> bool:
 		print("Not enough points for upgrade ", upgrade_id, " (needed: ", cost, ")")
 		return false
 	
-	# 1. Обработка разблокировки инструментов
 	if upgrade_id.ends_with("_unlock"):
 		var instrument_type = upgrade_id.split("_")[0]
 		if instrument_type.is_empty():
@@ -101,8 +92,9 @@ func upgrade(upgrade_id: String, cost: int) -> bool:
 		upgrade_levels[upgrade_id] = new_level
 		score -= cost
 		
-		if new_level == 1:  # Первый уровень = разблокировка
+		if new_level == 1:
 			unlocked_instruments.append(instrument_type)
+			unlocked_combo_lines[instrument_type] = [true] # Инициализируем первый паттерн
 			emit_signal("instrument_unlocked", instrument_type)
 			print("Instrument unlocked: ", instrument_type)
 		
@@ -111,7 +103,6 @@ func upgrade(upgrade_id: String, cost: int) -> bool:
 		print("Upgraded ", instrument_type, " to level ", new_level)
 		return true
 	
-	# 2. Обработка комбо-апгрейдов
 	if upgrade_id.ends_with("_combo"):
 		var instrument_type = upgrade_id.split("_")[0]
 		if instrument_type.is_empty():
@@ -121,7 +112,6 @@ func upgrade(upgrade_id: String, cost: int) -> bool:
 		upgrade_levels[upgrade_id] = new_level
 		score -= cost
 		
-		# Разблокируем паттерн из GlobalBalanceManager
 		var settings = GlobalBalanceManager.upgrades_settings.get(upgrade_id, {})
 		if settings.has("unlocks_pattern_line"):
 			var pattern_to_unlock = settings["unlocks_pattern_line"][new_level - 1]
@@ -131,7 +121,6 @@ func upgrade(upgrade_id: String, cost: int) -> bool:
 		print("Combo upgraded: ", instrument_type, " to level ", new_level)
 		return true
 	
-	# 3. Обычные улучшения (глобальные)
 	if not upgrade_levels.has(upgrade_id):
 		upgrade_levels[upgrade_id] = 1
 	else:
@@ -143,7 +132,6 @@ func upgrade(upgrade_id: String, cost: int) -> bool:
 	print("Upgrade applied: ", upgrade_id, " level ", upgrade_levels[upgrade_id])
 	return true
 
-# Разблокировка линии комбо (паттерна)
 func unlock_combo_line(instrument_type: String, line_index: int):
 	if instrument_type.is_empty():
 		push_error("Empty instrument_type in unlock_combo_line!")
@@ -158,7 +146,6 @@ func unlock_combo_line(instrument_type: String, line_index: int):
 	unlocked_combo_lines[instrument_type][line_index] = true
 	print("Combo line unlocked: ", instrument_type, " line ", line_index)
 
-# Подготовка данных для сохранения
 func get_save_data() -> Dictionary:
 	return {
 		"version": 2,
@@ -169,13 +156,10 @@ func get_save_data() -> Dictionary:
 		"unlocked_combo_lines": unlocked_combo_lines
 	}
 
-# Загрузка сохраненных данных
 func load_save_data(data: Dictionary):
-	# Явное преобразование типов
 	player_name = str(data.get("player_name", "Player"))
 	score = int(data.get("score", 0))
 	
-	# Критически важное преобразование массива
 	unlocked_instruments = _convert_to_string_array(data.get("unlocked_instruments", []))
 	
 	upgrade_levels = data.get("upgrade_levels", {}).duplicate()

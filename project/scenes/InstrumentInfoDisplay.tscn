@@ -11,8 +11,8 @@ script = ExtResource("1_3r5n2")
 
 [node name="PanelContainer" type="PanelContainer" parent="."]
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_right = 200.0
+offset_bottom = 80.0
 
 [node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer"]
 layout_mode = 2
@@ -23,15 +23,12 @@ theme = ExtResource("2_acf58")
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("3_imorw")
 theme_override_font_sizes/font_size = 56
-text = "0000"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="MultiplierLabel" type="Label" parent="PanelContainer/HBoxContainer"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.10748, 0.10748, 0.10748, 1)
-theme_override_fonts/font = ExtResource("3_imorw")
+theme_override_colors/font_color = Color(1, 1, 0, 1)
 theme_override_font_sizes/font_size = 56
-text = "0000"
 horizontal_alignment = 1
 vertical_alignment = 1

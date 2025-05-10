@@ -1,27 +1,37 @@
-class_name InstrumentInfoDisplay
 extends Control
 
-@onready var panel = $PanelContainer
-@onready var level_label = $PanelContainer/HBoxContainer/LevelLabel as Label
-@onready var multiplier_label = $PanelContainer/HBoxContainer/MultiplierLabel as Label
+@onready var level_label: Label = $PanelContainer/HBoxContainer/LevelLabel
+@onready var multiplier_label: Label = $PanelContainer/HBoxContainer/MultiplierLabel
 
 func _ready():
-	# Убедимся, что все элементы существуют
-	if !panel || !level_label || !multiplier_label:
-		push_error("Missing required nodes in InstrumentInfoDisplay!")
-		return
+	if level_label:
+		level_label.text = ""
+		print("InstrumentInfoDisplay: level_label initialized")
+	else:
+		push_error("InstrumentInfoDisplay: level_label not found")
 	
-	# Настройки по умолчанию
-	level_label.text = "Lv.0"
-	multiplier_label.text = ""
+	if multiplier_label:
+		multiplier_label.text = ""
+		multiplier_label.visible = false
+		print("InstrumentInfoDisplay: multiplier_label initialized")
+	else:
+		push_error("InstrumentInfoDisplay: multiplier_label not found")
 
 func update_display(level: int, multiplier: int):
-	if !is_instance_valid(level_label) || !is_instance_valid(multiplier_label):
-		return
-	
-	level_label.text = "Lv.%d" % level
-	if multiplier > 1:
-		multiplier_label.text = "x%d" % multiplier
-		multiplier_label.modulate = Color.GOLD  # Подсветка при комбо
+	if level_label:
+		level_label.text = "Lv.%d" % level
+		print("InstrumentInfoDisplay: Updated level_label to Lv.%d" % level)
 	else:
-		multiplier_label.text = ""
+		push_error("InstrumentInfoDisplay: level_label is null during update")
+	
+	if multiplier_label:
+		if multiplier > 1:
+			multiplier_label.text = "x%d" % multiplier
+			multiplier_label.visible = true
+			print("InstrumentInfoDisplay: Updated multiplier_label to x%d, visible: true" % multiplier)
+		else:
+			multiplier_label.text = ""
+			multiplier_label.visible = false
+			print("InstrumentInfoDisplay: Cleared multiplier_label, visible: false")
+	else:
+		push_error("InstrumentInfoDisplay: multiplier_label is null during update")
